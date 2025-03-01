@@ -1,0 +1,9 @@
+streamlit
+openai
+requests
+promptflow
+promptflow-tools
+promptflow-core
+promptflow-devkit
+promptflow-azure
+promptflow-tracing
