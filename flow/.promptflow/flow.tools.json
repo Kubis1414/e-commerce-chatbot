@@ -1,0 +1,54 @@
+{
+  "package": {},
+  "code": {
+    "filter_docs.py": {
+      "type": "python",
+      "inputs": {
+        "retrieved_docs": {
+          "type": [
+            "object"
+          ]
+        },
+        "user_query": {
+          "type": [
+            "string"
+          ]
+        }
+      },
+      "description": "Filters the retrieved documents to get the top 10 most relevant ones.",
+      "source": "filter_docs.py",
+      "function": "filter_docs"
+    },
+    "generate_answer.py": {
+      "type": "python",
+      "inputs": {
+        "user_query": {
+          "type": [
+            "string"
+          ]
+        },
+        "filtered_docs": {
+          "type": [
+            "object"
+          ]
+        }
+      },
+      "description": "Generates the final answer based on the filtered documents and the user query.",
+      "source": "generate_answer.py",
+      "function": "generate_answer"
+    },
+    "process_query.py": {
+      "type": "python",
+      "inputs": {
+        "user_query": {
+          "type": [
+            "string"
+          ]
+        }
+      },
+      "description": "Extracts a search query from the user question.",
+      "source": "process_query.py",
+      "function": "process_query"
+    }
+  }
+}

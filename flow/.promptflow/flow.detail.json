@@ -1,0 +1,236 @@
+{
+  "flow_runs": [
+    {
+      "run_id": "3ea0f1b9-e18f-4399-8757-5ee9a1bfc473_0",
+      "status": "Failed",
+      "error": {
+        "message": "Execution failure in 'process_query': (AttributeError) type object 'OpenAIConnection' has no attribute 'get_connection'",
+        "messageFormat": "Execution failure in '{node_name}'.",
+        "messageParameters": {
+          "node_name": "process_query"
+        },
+        "referenceCode": "Tool/__pf_main__",
+        "code": "UserError",
+        "innerError": {
+          "code": "ToolExecutionError",
+          "innerError": null
+        },
+        "additionalInfo": [
+          {
+            "type": "ToolExecutionErrorDetails",
+            "info": {
+              "type": "AttributeError",
+              "message": "type object 'OpenAIConnection' has no attribute 'get_connection'",
+              "traceback": "Traceback (most recent call last):\n  File \"/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/.venv/lib/python3.9/site-packages/promptflow/tracing/_trace.py\", line 564, in wrapped\n    output = func(*args, **kwargs)\n  File \"/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/flow/process_query.py\", line 20, in process_query\n    conn = OpenAIConnection.get_connection(\"openai_connection\")\nAttributeError: type object 'OpenAIConnection' has no attribute 'get_connection'\n",
+              "filename": "/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/flow/process_query.py",
+              "lineno": 20,
+              "name": "process_query"
+            }
+          }
+        ],
+        "debugInfo": {
+          "type": "ToolExecutionError",
+          "message": "Execution failure in 'process_query': (AttributeError) type object 'OpenAIConnection' has no attribute 'get_connection'",
+          "stackTrace": "\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/.venv/lib/python3.9/site-packages/promptflow/executor/flow_executor.py\", line 1034, in _exec\n    output, aggregation_inputs = self._exec_inner_with_trace(\n  File \"/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/.venv/lib/python3.9/site-packages/promptflow/executor/flow_executor.py\", line 937, in _exec_inner_with_trace\n    output, nodes_outputs = self._traverse_nodes(inputs, context)\n  File \"/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/.venv/lib/python3.9/site-packages/promptflow/executor/flow_executor.py\", line 1215, in _traverse_nodes\n    nodes_outputs, bypassed_nodes = self._submit_to_scheduler(context, inputs, batch_nodes)\n  File \"/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/.venv/lib/python3.9/site-packages/promptflow/executor/flow_executor.py\", line 1270, in _submit_to_scheduler\n    return scheduler.execute(self._line_timeout_sec)\n  File \"/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/.venv/lib/python3.9/site-packages/promptflow/executor/_flow_nodes_scheduler.py\", line 131, in execute\n    raise e\n  File \"/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/.venv/lib/python3.9/site-packages/promptflow/executor/_flow_nodes_scheduler.py\", line 113, in execute\n    self._dag_manager.complete_nodes(self._collect_outputs(completed_futures))\n  File \"/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/.venv/lib/python3.9/site-packages/promptflow/executor/_flow_nodes_scheduler.py\", line 160, in _collect_outputs\n    each_node_result = each_future.result()\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/concurrent/futures/_base.py\", line 438, in result\n    return self.__get_result()\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/concurrent/futures/_base.py\", line 390, in __get_result\n    raise self._exception\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/concurrent/futures/thread.py\", line 52, in run\n    result = self.fn(*self.args, **self.kwargs)\n  File \"/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/.venv/lib/python3.9/site-packages/promptflow/executor/_flow_nodes_scheduler.py\", line 181, in _exec_single_node_in_thread\n    result = context.invoke_tool(node, f, kwargs=kwargs)\n  File \"/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/.venv/lib/python3.9/site-packages/promptflow/_core/flow_execution_context.py\", line 90, in invoke_tool\n    result = self._invoke_tool_inner(node, f, kwargs)\n  File \"/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/.venv/lib/python3.9/site-packages/promptflow/_core/flow_execution_context.py\", line 206, in _invoke_tool_inner\n    raise ToolExecutionError(node_name=node_name, module=module) from e\n",
+          "innerException": {
+            "type": "AttributeError",
+            "message": "type object 'OpenAIConnection' has no attribute 'get_connection'",
+            "stackTrace": "Traceback (most recent call last):\n  File \"/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/.venv/lib/python3.9/site-packages/promptflow/_core/flow_execution_context.py\", line 182, in _invoke_tool_inner\n    return f(**kwargs)\n  File \"/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/.venv/lib/python3.9/site-packages/promptflow/tracing/_trace.py\", line 564, in wrapped\n    output = func(*args, **kwargs)\n  File \"/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/flow/process_query.py\", line 20, in process_query\n    conn = OpenAIConnection.get_connection(\"openai_connection\")\n",
+            "innerException": null
+          }
+        }
+      },
+      "inputs": {
+        "user_query": "jak se máš"
+      },
+      "output": null,
+      "metrics": null,
+      "request": null,
+      "parent_run_id": "3ea0f1b9-e18f-4399-8757-5ee9a1bfc473",
+      "root_run_id": "3ea0f1b9-e18f-4399-8757-5ee9a1bfc473",
+      "source_run_id": null,
+      "flow_id": "default_flow_id",
+      "start_time": "2025-03-01T20:59:06.716068Z",
+      "end_time": "2025-03-01T20:59:06.741873Z",
+      "index": 0,
+      "api_calls": [
+        {
+          "name": "flow",
+          "node_name": "flow",
+          "type": "Flow",
+          "start_time": 1740859146.716068,
+          "end_time": 1740859146.741873,
+          "children": [
+            {
+              "name": "process_query",
+              "type": "Function",
+              "inputs": {
+                "user_query": "jak se máš"
+              },
+              "output": null,
+              "start_time": 1740859146.717121,
+              "end_time": 1740859146.71865,
+              "error": {
+                "message": "type object 'OpenAIConnection' has no attribute 'get_connection'",
+                "type": "AttributeError"
+              },
+              "children": [],
+              "node_name": "process_query",
+              "parent_id": "",
+              "id": "30295df8-c74f-4d41-8d78-805a157c06bc",
+              "function": "process_query",
+              "system_metrics": {}
+            }
+          ],
+          "system_metrics": {
+            "duration": 0.025805,
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "total_tokens": 0
+          },
+          "inputs": {
+            "user_query": "jak se máš"
+          },
+          "output": null,
+          "error": {
+            "message": "Execution failure in 'process_query': (AttributeError) type object 'OpenAIConnection' has no attribute 'get_connection'",
+            "messageFormat": "Execution failure in '{node_name}'.",
+            "messageParameters": {
+              "node_name": "process_query"
+            },
+            "referenceCode": "Tool/__pf_main__",
+            "code": "UserError",
+            "innerError": {
+              "code": "ToolExecutionError",
+              "innerError": null
+            },
+            "additionalInfo": [
+              {
+                "type": "ToolExecutionErrorDetails",
+                "info": {
+                  "type": "AttributeError",
+                  "message": "type object 'OpenAIConnection' has no attribute 'get_connection'",
+                  "traceback": "Traceback (most recent call last):\n  File \"/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/.venv/lib/python3.9/site-packages/promptflow/tracing/_trace.py\", line 564, in wrapped\n    output = func(*args, **kwargs)\n  File \"/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/flow/process_query.py\", line 20, in process_query\n    conn = OpenAIConnection.get_connection(\"openai_connection\")\nAttributeError: type object 'OpenAIConnection' has no attribute 'get_connection'\n",
+                  "filename": "/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/flow/process_query.py",
+                  "lineno": 20,
+                  "name": "process_query"
+                }
+              }
+            ],
+            "debugInfo": {
+              "type": "ToolExecutionError",
+              "message": "Execution failure in 'process_query': (AttributeError) type object 'OpenAIConnection' has no attribute 'get_connection'",
+              "stackTrace": "\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/.venv/lib/python3.9/site-packages/promptflow/executor/flow_executor.py\", line 1034, in _exec\n    output, aggregation_inputs = self._exec_inner_with_trace(\n  File \"/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/.venv/lib/python3.9/site-packages/promptflow/executor/flow_executor.py\", line 937, in _exec_inner_with_trace\n    output, nodes_outputs = self._traverse_nodes(inputs, context)\n  File \"/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/.venv/lib/python3.9/site-packages/promptflow/executor/flow_executor.py\", line 1215, in _traverse_nodes\n    nodes_outputs, bypassed_nodes = self._submit_to_scheduler(context, inputs, batch_nodes)\n  File \"/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/.venv/lib/python3.9/site-packages/promptflow/executor/flow_executor.py\", line 1270, in _submit_to_scheduler\n    return scheduler.execute(self._line_timeout_sec)\n  File \"/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/.venv/lib/python3.9/site-packages/promptflow/executor/_flow_nodes_scheduler.py\", line 131, in execute\n    raise e\n  File \"/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/.venv/lib/python3.9/site-packages/promptflow/executor/_flow_nodes_scheduler.py\", line 113, in execute\n    self._dag_manager.complete_nodes(self._collect_outputs(completed_futures))\n  File \"/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/.venv/lib/python3.9/site-packages/promptflow/executor/_flow_nodes_scheduler.py\", line 160, in _collect_outputs\n    each_node_result = each_future.result()\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/concurrent/futures/_base.py\", line 438, in result\n    return self.__get_result()\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/concurrent/futures/_base.py\", line 390, in __get_result\n    raise self._exception\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/concurrent/futures/thread.py\", line 52, in run\n    result = self.fn(*self.args, **self.kwargs)\n  File \"/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/.venv/lib/python3.9/site-packages/promptflow/executor/_flow_nodes_scheduler.py\", line 181, in _exec_single_node_in_thread\n    result = context.invoke_tool(node, f, kwargs=kwargs)\n  File \"/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/.venv/lib/python3.9/site-packages/promptflow/_core/flow_execution_context.py\", line 90, in invoke_tool\n    result = self._invoke_tool_inner(node, f, kwargs)\n  File \"/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/.venv/lib/python3.9/site-packages/promptflow/_core/flow_execution_context.py\", line 206, in _invoke_tool_inner\n    raise ToolExecutionError(node_name=node_name, module=module) from e\n",
+              "innerException": {
+                "type": "AttributeError",
+                "message": "type object 'OpenAIConnection' has no attribute 'get_connection'",
+                "stackTrace": "Traceback (most recent call last):\n  File \"/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/.venv/lib/python3.9/site-packages/promptflow/_core/flow_execution_context.py\", line 182, in _invoke_tool_inner\n    return f(**kwargs)\n  File \"/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/.venv/lib/python3.9/site-packages/promptflow/tracing/_trace.py\", line 564, in wrapped\n    output = func(*args, **kwargs)\n  File \"/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/flow/process_query.py\", line 20, in process_query\n    conn = OpenAIConnection.get_connection(\"openai_connection\")\n",
+                "innerException": null
+              }
+            }
+          }
+        }
+      ],
+      "name": "",
+      "description": "",
+      "tags": null,
+      "system_metrics": {
+        "duration": 0.025805,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      },
+      "result": null,
+      "upload_metrics": false,
+      "otel_trace_id": "0x072a60d6a9cc4874afb961d32b48803f",
+      "message_format": "basic"
+    }
+  ],
+  "node_runs": [
+    {
+      "node": "process_query",
+      "flow_run_id": "3ea0f1b9-e18f-4399-8757-5ee9a1bfc473",
+      "run_id": "3ea0f1b9-e18f-4399-8757-5ee9a1bfc473_process_query_0",
+      "status": "Failed",
+      "inputs": {
+        "user_query": "jak se máš"
+      },
+      "output": null,
+      "metrics": null,
+      "error": {
+        "message": "Execution failure in 'process_query': (AttributeError) type object 'OpenAIConnection' has no attribute 'get_connection'",
+        "messageFormat": "Execution failure in '{node_name}'.",
+        "messageParameters": {
+          "node_name": "process_query"
+        },
+        "referenceCode": "Tool/__pf_main__",
+        "code": "UserError",
+        "innerError": {
+          "code": "ToolExecutionError",
+          "innerError": null
+        },
+        "additionalInfo": [
+          {
+            "type": "ToolExecutionErrorDetails",
+            "info": {
+              "type": "AttributeError",
+              "message": "type object 'OpenAIConnection' has no attribute 'get_connection'",
+              "traceback": "Traceback (most recent call last):\n  File \"/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/.venv/lib/python3.9/site-packages/promptflow/tracing/_trace.py\", line 564, in wrapped\n    output = func(*args, **kwargs)\n  File \"/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/flow/process_query.py\", line 20, in process_query\n    conn = OpenAIConnection.get_connection(\"openai_connection\")\nAttributeError: type object 'OpenAIConnection' has no attribute 'get_connection'\n",
+              "filename": "/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/flow/process_query.py",
+              "lineno": 20,
+              "name": "process_query"
+            }
+          }
+        ],
+        "debugInfo": {
+          "type": "ToolExecutionError",
+          "message": "Execution failure in 'process_query': (AttributeError) type object 'OpenAIConnection' has no attribute 'get_connection'",
+          "stackTrace": "\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/.venv/lib/python3.9/site-packages/promptflow/_core/flow_execution_context.py\", line 90, in invoke_tool\n    result = self._invoke_tool_inner(node, f, kwargs)\n  File \"/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/.venv/lib/python3.9/site-packages/promptflow/_core/flow_execution_context.py\", line 206, in _invoke_tool_inner\n    raise ToolExecutionError(node_name=node_name, module=module) from e\n",
+          "innerException": {
+            "type": "AttributeError",
+            "message": "type object 'OpenAIConnection' has no attribute 'get_connection'",
+            "stackTrace": "Traceback (most recent call last):\n  File \"/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/.venv/lib/python3.9/site-packages/promptflow/_core/flow_execution_context.py\", line 182, in _invoke_tool_inner\n    return f(**kwargs)\n  File \"/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/.venv/lib/python3.9/site-packages/promptflow/tracing/_trace.py\", line 564, in wrapped\n    output = func(*args, **kwargs)\n  File \"/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/flow/process_query.py\", line 20, in process_query\n    conn = OpenAIConnection.get_connection(\"openai_connection\")\n",
+            "innerException": null
+          }
+        }
+      },
+      "parent_run_id": "3ea0f1b9-e18f-4399-8757-5ee9a1bfc473_0",
+      "start_time": "2025-03-01T20:59:06.717064Z",
+      "end_time": "2025-03-01T20:59:06.735242Z",
+      "index": 0,
+      "api_calls": [
+        {
+          "name": "process_query",
+          "type": "Function",
+          "inputs": {
+            "user_query": "jak se máš"
+          },
+          "output": null,
+          "start_time": 1740859146.717121,
+          "end_time": 1740859146.71865,
+          "error": {
+            "message": "type object 'OpenAIConnection' has no attribute 'get_connection'",
+            "type": "AttributeError"
+          },
+          "children": [],
+          "node_name": "process_query",
+          "parent_id": "",
+          "id": "30295df8-c74f-4d41-8d78-805a157c06bc",
+          "function": "process_query",
+          "system_metrics": {}
+        }
+      ],
+      "cached_run_id": null,
+      "cached_flow_run_id": null,
+      "logs": {
+        "stdout": "",
+        "stderr": ""
+      },
+      "system_metrics": {
+        "duration": 0.018178
+      },
+      "result": null,
+      "message_format": "basic"
+    }
+  ]
+}

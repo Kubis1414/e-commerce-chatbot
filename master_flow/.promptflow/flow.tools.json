@@ -1,0 +1,17 @@
+{
+  "package": {},
+  "code": {
+    "init.py": {
+      "type": "python",
+      "inputs": {
+        "person": {
+          "type": [
+            "object"
+          ]
+        }
+      },
+      "source": "init.py",
+      "function": "init"
+    }
+  }
+}

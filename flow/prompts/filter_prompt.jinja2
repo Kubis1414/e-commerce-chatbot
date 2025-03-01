@@ -1,0 +1,19 @@
+Na základě dotazu zákazníka a seznamu dostupných dokumentů vyber 10 dokumentů, které jsou nejrelevantnější k dotazu.
+
+Dotaz zákazníka: "{{ user_query }}"
+
+Seznam dokumentů (aktuálně 50):
+{{ documents }}
+
+Tvým úkolem je:
+1. Analyzovat dotaz zákazníka a určit, co přesně hledá nebo na co se ptá
+2. Prozkoumat každý dokument a posoudit jeho relevanci k dotazu
+3. Vybrat 10 nejrelevantnějších dokumentů, které nejlépe odpovídají na dotaz zákazníka
+4. Vrátit tyto dokumenty jako JSON pole ve stejném formátu jako vstupní dokumenty
+
+Při hodnocení relevance dokumentů zvaž:
+- Přímou souvislost s požadovaným produktem nebo kategorií
+- Shodu s požadovanými vlastnostmi nebo parametry
+- Zda dokument obsahuje užitečné informace pro zákazníka
+
+Vrať přesně 10 dokumentů jako JSON pole. Pokud je méně než 10 dokumentů relevantních, doplň výběr o dokumenty, které by mohly být zákazníkovi užitečné.

@@ -7,3 +7,5 @@ promptflow-core
 promptflow-devkit
 promptflow-azure
 promptflow-tracing
+faiss-cpu
+sentence_transformers

@@ -1,0 +1,22 @@
+2025-03-01 21:59:06 +0100    6122 execution.flow     INFO     Start executing nodes in thread pool mode.
+2025-03-01 21:59:06 +0100    6122 execution.flow     INFO     Start to run 4 nodes with concurrency level 16.
+2025-03-01 21:59:06 +0100    6122 execution.flow     INFO     Executing node process_query. node run id: 3ea0f1b9-e18f-4399-8757-5ee9a1bfc473_process_query_0
+2025-03-01 21:59:06 +0100    6122 execution          ERROR    Node process_query in line 0 failed. Exception: Execution failure in 'process_query': (AttributeError) type object 'OpenAIConnection' has no attribute 'get_connection'.
+Traceback (most recent call last):
+  File "/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/.venv/lib/python3.9/site-packages/promptflow/_core/flow_execution_context.py", line 182, in _invoke_tool_inner
+    return f(**kwargs)
+  File "/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/.venv/lib/python3.9/site-packages/promptflow/tracing/_trace.py", line 564, in wrapped
+    output = func(*args, **kwargs)
+  File "/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/flow/process_query.py", line 20, in process_query
+    conn = OpenAIConnection.get_connection("openai_connection")
+AttributeError: type object 'OpenAIConnection' has no attribute 'get_connection'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/.venv/lib/python3.9/site-packages/promptflow/_core/flow_execution_context.py", line 90, in invoke_tool
+    result = self._invoke_tool_inner(node, f, kwargs)
+  File "/Users/martinkubanek/Documents/VŠE/Bakalářka/chat/.venv/lib/python3.9/site-packages/promptflow/_core/flow_execution_context.py", line 206, in _invoke_tool_inner
+    raise ToolExecutionError(node_name=node_name, module=module) from e
+promptflow._core._errors.ToolExecutionError: Execution failure in 'process_query': (AttributeError) type object 'OpenAIConnection' has no attribute 'get_connection'
+2025-03-01 21:59:06 +0100    6122 execution.flow     ERROR    Flow execution has failed. Cancelling all running nodes: process_query.

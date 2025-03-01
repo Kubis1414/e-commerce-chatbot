@@ -1,0 +1,11 @@
+Na základě následujícího dotazu zákazníka e-shopu extrahuj klíčová slova, která nejlépe vystihují, co zákazník hledá.
+Tato klíčová slova budou použita pro vyhledávání v databázi produktů.
+
+Dotaz zákazníka: "{{ user_query }}"
+
+Extrahuj pouze podstatná klíčová slova, která reprezentují:
+1. Typy produktů, které zákazník hledá
+2. Vlastnosti nebo funkce, které zákazník požaduje
+3. Značky nebo kategorie, které zákazník zmínil
+
+Výstup by měl být stručný (maximálně 10 slov) a obsahovat pouze klíčová slova oddělená mezerami, bez interpunkce.

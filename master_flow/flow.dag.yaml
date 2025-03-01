@@ -1,3 +1,26 @@
-inputs: {}
-outputs: {}
-nodes: []
+inputs:
+  customer_input:
+    type: string
+    default: ""
+  chat_history:
+    type: list
+  context:
+    type: object
+  person:
+    type: object
+outputs:
+  response:
+    type: string
+  chat_history:
+    type: string
+  context:
+    type: string
+  person:
+    type: string
+nodes:
+- name: init
+  type: python
+  source:
+    type: code
+    path: init.py
+  inputs: {}
