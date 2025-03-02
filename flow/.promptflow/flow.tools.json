@@ -40,15 +40,33 @@
     "process_query.py": {
       "type": "python",
       "inputs": {
-        "user_query": {
+        "customer_input": {
+          "type": [
+            "string"
+          ]
+        },
+        "chat_history": {
+          "type": [
+            "list"
+          ]
+        }
+      },
+      "description": "Extracts a search query from the user customer_input and chat_history",
+      "source": "process_query.py",
+      "function": "process_query"
+    },
+    "search_docs.py": {
+      "type": "python",
+      "inputs": {
+        "search_query": {
           "type": [
             "string"
           ]
         }
       },
-      "description": "Extracts a search query from the user question.",
-      "source": "process_query.py",
-      "function": "process_query"
+      "description": "Searches for relevant documents in the vector database.",
+      "source": "search_docs.py",
+      "function": "search_docs"
     }
   }
 }

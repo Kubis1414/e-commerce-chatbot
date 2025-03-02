@@ -1,10 +1,14 @@
 from promptflow import tool
-from promptflow.connections import OpenAIConnection
 import os
-import openai
 import json
 from typing import List, Dict
-from jinja2 import Template
+from langchain_openai import ChatOpenAI
+from langchain.prompts import ChatPromptTemplate
+from langchain.chains import LLMChain
+from dotenv import load_dotenv
+
+# Načtení proměnných z .env souboru
+load_dotenv()
 
 @tool
 def generate_answer(user_query: str, filtered_docs: List[Dict]) -> str:
@@ -13,27 +17,26 @@ def generate_answer(user_query: str, filtered_docs: List[Dict]) -> str:
     """
     # Načtení promptu
     with open(os.path.join(os.path.dirname(__file__), "prompts", "answer_generation.jinja2"), "r", encoding="utf-8") as f:
-        prompt_template = Template(f.read())
+        prompt_template_content = f.read()
     
-    # Sestavení promptu
-    docs_json = json.dumps(filtered_docs, ensure_ascii=False)
-    prompt = prompt_template.render(user_query=user_query, documents=docs_json)
-    
-    # Získání OpenAI connection z promptflow
-    conn = OpenAIConnection.get_connection("openai_connection")
-    client = openai.OpenAI(api_key=conn.api_key)
-    
-    # Volání OpenAI API
-    response = client.chat.completions.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": "Jsi asistent pro e-shop, který pomáhá zákazníkům s jejich dotazy. Komunikuješ v přátelském, ale profesionálním tónu."},
-            {"role": "user", "content": prompt}
-        ],
+    # Vytvoření LangChain chat modelu
+    llm = ChatOpenAI(
+        model_name="gpt-4o",
         temperature=0.5
     )
     
+    # Vytvoření LangChain promptu
+    docs_json = json.dumps(filtered_docs, ensure_ascii=False)
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", "Jsi asistent pro e-shop, který pomáhá zákazníkům s jejich dotazy. Komunikuješ v přátelském, ale profesionálním tónu."),
+        ("human", prompt_template_content)
+    ])
+    
+    # Vytvoření a spuštění chainu
+    chain = LLMChain(llm=llm, prompt=prompt)
+    response = chain.invoke({"user_query": user_query, "documents": docs_json})
+    
     # Získání odpovědi
-    answer = response.choices[0].message.content.strip()
+    answer = response["text"].strip()
     
     return answer

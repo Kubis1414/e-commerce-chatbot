@@ -1,3 +1,20 @@
 {
-  "nodes": {}
+  "nodes": {
+    "get_customer_info": {
+      "variant_0": {
+        "inputs": {
+          "customer_dict": []
+        }
+      }
+    },
+    "generate_search_queries": {
+      "variant_0": {
+        "inputs": {
+          "customer_input": [],
+          "chat_history": [],
+          "context": []
+        }
+      }
+    }
+  }
 }

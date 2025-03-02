@@ -6,8 +6,10 @@ inputs:
     type: list
   context:
     type: object
-  person:
+    default: {}
+  customer:
     type: object
+    default: {}
 outputs:
   response:
     type: string
@@ -15,12 +17,23 @@ outputs:
     type: string
   context:
     type: string
-  person:
+  customer:
     type: string
+    reference: ${get_customer_info.output}
 nodes:
-- name: init
+- name: get_customer_info
   type: python
   source:
     type: code
-    path: init.py
-  inputs: {}
+    path: get_customer_info.py
+  inputs:
+    customer_dict: ${inputs.customer}
+- name: generate_search_queries
+  type: python
+  source:
+    type: code
+    path: generate_search_queries.py
+  inputs:
+    customer_input: ${inputs.customer_input}
+    chat_history: ${inputs.chat_history}
+    context: ${inputs.context}

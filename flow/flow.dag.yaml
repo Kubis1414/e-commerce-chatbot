@@ -13,8 +13,7 @@ nodes:
   source:
     type: code
     path: process_query.py
-  inputs:
-    user_query: ${inputs.user_query}
+  inputs: {}
   outputs:
     search_query: ${output}
 - name: search_docs

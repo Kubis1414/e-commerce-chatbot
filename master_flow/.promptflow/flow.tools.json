@@ -1,17 +1,39 @@
 {
   "package": {},
   "code": {
-    "init.py": {
+    "get_customer_info.py": {
       "type": "python",
       "inputs": {
-        "person": {
+        "customer_dict": {
           "type": [
             "object"
           ]
         }
       },
-      "source": "init.py",
-      "function": "init"
+      "source": "get_customer_info.py",
+      "function": "get_customer_info"
+    },
+    "generate_search_queries.py": {
+      "type": "python",
+      "inputs": {
+        "customer_input": {
+          "type": [
+            "string"
+          ]
+        },
+        "chat_history": {
+          "type": [
+            "list"
+          ]
+        },
+        "context": {
+          "type": [
+            "object"
+          ]
+        }
+      },
+      "source": "generate_search_queries.py",
+      "function": "generate_search_queries"
     }
   }
 }

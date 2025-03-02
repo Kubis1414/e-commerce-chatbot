@@ -2,32 +2,32 @@
   "nodeLayouts": {
     "inputs": {
       "x": 290,
-      "y": 42,
+      "y": 176,
       "index": -1
     },
     "outputs": {
-      "x": 220,
-      "y": 712,
+      "x": 385,
+      "y": 578,
       "index": -1
     },
     "process_query": {
-      "x": 140,
-      "y": 176,
+      "x": 470,
+      "y": 42,
       "index": 0
     },
     "search_docs": {
-      "x": 140,
-      "y": 310,
+      "x": 470,
+      "y": 176,
       "index": 1
     },
     "filter_docs": {
-      "x": 227.5,
-      "y": 444,
+      "x": 460,
+      "y": 310,
       "index": 2
     },
     "generate_answer": {
-      "x": 140,
-      "y": 578,
+      "x": 305,
+      "y": 444,
       "index": 3
     }
   },
