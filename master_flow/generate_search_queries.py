@@ -1,4 +1,4 @@
-from promptflow import tool
+from promptflow.core import tool
 from typing import List
 from pydantic import BaseModel, Field
 from langchain.prompts.prompt import PromptTemplate
@@ -8,14 +8,14 @@ from utils.models import Models
 class OutputSchema(BaseModel):
     """Output schema for the LLM that generates search queries."""
 
-    buttons_list: List[str] = Field(default_factory=list, description="List of search queries that will be used to search the vector database for documents, related to the customer inquiry.")
+    search_queries: List[str] = Field(default_factory=list, description="List of search queries that will be used to search the vector database for documents, related to the customer inquiry.")
 
 
 @tool
 def generate_search_queries(customer_input: str, chat_history: list, context: dict) -> list[str]:
     search_queries = []
     
-    llm = Models.openai
+    llm = Models.gemini_mini
     
     prompt = PromptTemplate.from_template('''
         Create a prompt that generates a list of search queries based on customer inquiries. 
@@ -37,8 +37,8 @@ def generate_search_queries(customer_input: str, chat_history: list, context: di
     ''')
     
     data = {
-        "page_title": context.page_title,
-        "current_url": context.current_url,
+        "page_title": context.get("page_title", ""),
+        "current_url": context.get("current_url", ""),
         "customer_input": customer_input,
         "chat_history": chat_history
     }
@@ -47,7 +47,6 @@ def generate_search_queries(customer_input: str, chat_history: list, context: di
     chain = prompt | structured_llm
     
     output_data = chain.invoke(data)
-    
-    print(output_data)
+    search_queries = output_data.get("parsed").search_queries
     
     return search_queries

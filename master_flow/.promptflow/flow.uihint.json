@@ -15,6 +15,24 @@
           "context": []
         }
       }
+    },
+    "get_documents_from_vector_db": {
+      "variant_0": {
+        "inputs": {
+          "search_queries": []
+        }
+      }
+    },
+    "get_answer": {
+      "variant_0": {
+        "inputs": {
+          "customer_input": [],
+          "documents": [],
+          "context": [],
+          "chat_history": [],
+          "customer": []
+        }
+      }
     }
   }
 }

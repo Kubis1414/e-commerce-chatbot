@@ -1,7 +1,8 @@
 inputs:
   customer_input:
     type: string
-    default: ""
+    default: "jaký telefon si mám koupit¨, chtěl bych novej ihpeopn bud iphone 15
+      pro nebo 16 pro, ajký si mám vybrat? "
   chat_history:
     type: list
   context:
@@ -9,17 +10,21 @@ inputs:
     default: {}
   customer:
     type: object
-    default: {}
+    default:
+      customer_id: CUS905621345
 outputs:
   response:
     type: string
+    reference: ${get_answer.output.response}
   chat_history:
     type: string
+    reference: ${get_answer.output.chat_history}
   context:
     type: string
+    reference: ${get_answer.output.context}
   customer:
     type: string
-    reference: ${get_customer_info.output}
+    reference: ${get_answer.output.customer}
 nodes:
 - name: get_customer_info
   type: python
@@ -37,3 +42,21 @@ nodes:
     customer_input: ${inputs.customer_input}
     chat_history: ${inputs.chat_history}
     context: ${inputs.context}
+- name: get_documents_from_vector_db
+  type: python
+  source:
+    type: code
+    path: get_documents_from_vector_db.py
+  inputs:
+    search_queries: ${generate_search_queries.output}
+- name: get_answer
+  type: python
+  source:
+    type: code
+    path: get_answer.py
+  inputs:
+    customer_input: ${inputs.customer_input}
+    documents: ${get_documents_from_vector_db.output}
+    context: ${inputs.context}
+    chat_history: ${inputs.chat_history}
+    customer: ${get_customer_info.output}

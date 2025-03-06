@@ -1,0 +1,37 @@
+[
+    {
+        "customer_id": "CUS765894089",
+        "name": "Jan Novák",
+        "vokative": "Jane",
+        "email": "jan.novak@email.cz",
+        "favorite_brands": ["Apple", "Lego", "Sony"]
+    },
+    {
+        "customer_id": "CUS905621345",
+        "name": "Marie Svobodová",
+        "vokative": "Marie",
+        "email": "marie.svobodova@email.cz",
+        "favorite_brands": ["Xioami", "Samsung"]
+    },
+    {
+        "customer_id": "CUS168925307",
+        "name": "Petr Dvořák",
+        "vokative": "Petře",
+        "email": "petr.dvorak@email.cz",
+        "favorite_brands": ["Dell", "HP", "Lenovo"]
+    },
+    {
+        "customer_id": "CUS788902345",
+        "name": "Eva Černá",
+        "vokative": "Evo",
+        "email": "eva.cerna@email.cz",
+        "favorite_brands": ["Apple", "Lego"]
+    },
+    {
+        "customer_id": "CUS630952341",
+        "name": "Tomáš Procházka",
+        "vokative": "Tomáši",
+        "email": "tomas.prochazka@email.cz",
+        "favorite_brands": ["Samsung", "MSI"]
+    }
+]
