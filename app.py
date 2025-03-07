@@ -1,5 +1,6 @@
 import streamlit as st
 from promptflow import PFClient
+from components.ProductCarousel import product_carousel
 
 # Inicializace Streamlit
 st.set_page_config(layout="wide")
@@ -171,6 +172,10 @@ if customer_message := st.chat_input("Napište svoji zprávu..."):
         st.session_state.messages.append({"role": "assistant", "content": assistant_response})
         with st.chat_message("assistant"):
             st.markdown(assistant_response)
+            
+            # Zobrazení doporučených produktů, pokud nějaké jsou
+            if recommended_products:
+                product_carousel(recommended_products)
             
     except Exception as e:
         st.error(f"Došlo k chybě při zpracování požadavku: {str(e)}")
