@@ -1,4 +1,8 @@
 .env
 gen-lang-client-0615879883-ad0fcb0ce2b8.json
 Flashpost-tests
-.*
+.vscode
+.pytest_cache
+__pycache__
+.DS_Store
+*.promptflow
