@@ -1,9 +1,5 @@
 import streamlit as st
-import json
 from promptflow import PFClient
-from promptflow.entities import AzureOpenAIConnection
-import os
-from datetime import datetime
 
 # Inicializace Streamlit
 st.set_page_config(layout="wide")
@@ -18,84 +14,144 @@ if "context" not in st.session_state:
 if "customer" not in st.session_state:
     st.session_state.customer = {}
 
-# Vytvoření layoutu se dvěma sloupci
-col1, col2 = st.columns([2, 1])
+if "customer_message" not in st.session_state:
+    st.session_state.customer_message = ""
 
-with col2:
-    st.subheader("Nastavení")
-    
-    # Context editor
-    st.write("Context")
-    context_page_title = st.text_input("Page Title", key="context_page_title")
-    context_current_url = st.text_input("Current URL", key="context_current_url")
-    
-    if context_page_title or context_current_url:
-        st.session_state.context = {
-            "page_title": context_page_title,
-            "current_url": context_current_url
-        }
-    
-    # Customer editor
-    st.write("Customer")
-    customer_id = st.text_input("Customer ID", key="customer_id")
-    customer_name = st.text_input("Name", key="customer_name")
-    customer_email = st.text_input("Email", key="customer_email")
-    customer_vokative = st.text_input("Vokativ", key="customer_vokative")
-    
-    if customer_id:
-        st.session_state.customer = {
-            "customer_id": customer_id,
-            "name": customer_name,
-            "email": customer_email,
-            "vokative": customer_vokative
-        }
-        # Odstranění prázdných hodnot
-        st.session_state.customer = {k: v for k, v in st.session_state.customer.items() if v}
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
 
-with col1:
-    st.title("Chat s AI Asistentem")
-    
-    # Zobrazení chat historie
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+if "language" not in st.session_state:
+    st.session_state.language = "CS"
 
-    # Chat input
-    if prompt := st.chat_input("Napište svoji zprávu..."):
-        # Přidání uživatelské zprávy do historie
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"):
-            st.markdown(prompt)
+if "selected_page_index" not in st.session_state:
+    st.session_state.selected_page_index = 0
 
-        try:
-            # Inicializace PFClient
-            pf = PFClient()
-            
-            # Příprava dat pro flow
-            flow_inputs = {
-                "user_query": prompt,
-                "chat_history": [{"role": m["role"], "content": m["content"]} 
-                               for m in st.session_state.messages[:-1]],  # Bez poslední zprávy
-                "context": st.session_state.context,
-                "customer": st.session_state.customer
-            }
-            
-            # Spuštění flow
-            flow_result = pf.test(flow="flow", inputs=flow_inputs)
-            
-            # Získání odpovědi z flow
-            assistant_response = flow_result["final_answer"]
-            
-            # Přidání odpovědi asistenta do historie
-            st.session_state.messages.append({"role": "assistant", "content": assistant_response})
-            with st.chat_message("assistant"):
-                st.markdown(assistant_response)
+# Přednastavené hodnoty
+CUSTOMER_IDS = ["CUS765894089", "CUS905621345", "CUS168925307", "CUS788902345", "CUS630952341", "anonymous"]
+
+# Vytvoření párů title-url pro synchronizaci
+PAGE_DATA = [
+    {
+        "title": "Domů - E-shop s elektronikou",
+        "url": "https://eshop.cz/"
+    },
+    {
+        "title": "Mobilní telefon iPhone 15 Pro Max",
+        "url": "https://eshop.cz/mobily/iphone-15-pro-max"
+    },
+    {
+        "title": "Notebooky MacBook Pro M1 Pro",
+        "url": "https://eshop.cz/notebooky/macbook-pro-m1-pro"
+    },
+    {
+        "title": 'Televize Samsung 8K 75"',
+        "url": 'https://eshop.cz/televize/samsung-8k-75'
+    },
+    {
+        "title": "Kontakt a podpora",
+        "url": "https://eshop.cz/kontakt"
+    }
+]
+
+# Získání seznamů titles a urls přímo z PAGE_DATA
+PAGE_TITLES = [page["title"] for page in PAGE_DATA]
+URLS = [page["url"] for page in PAGE_DATA]
+
+LANGUAGES = {
+    "CS": "Čeština",
+    "SK": "Slovenština",
+    "EN": "Angličtina",
+    "DE": "Němčina"
+}
+
+# Vytvoření layoutu
+with st.sidebar:
+    with st.expander("Nastavení", expanded=True):
+        # Context editor
+        st.write("Context")
+        
+        # Synchronizované selectboxy
+        selected_title_index = PAGE_TITLES.index(st.selectbox("Page Title", PAGE_TITLES, key="context_page_title", index=st.session_state.selected_page_index))
+        st.session_state.selected_page_index = selected_title_index
+        
+        # URL se automaticky aktualizuje podle vybraného titulku
+        context_current_url = URLS[selected_title_index]
                 
-        except Exception as e:
-            st.error(f"Došlo k chybě při zpracování požadavku: {str(e)}")
+        # Language selector
+        selected_language = st.selectbox(
+            "Jazyk komunikace",
+            options=list(LANGUAGES.keys()), 
+            format_func=lambda x: LANGUAGES[x],
+            key="language"
+        )
+        
+        st.session_state.context = {
+            "page_title": PAGE_TITLES[selected_title_index],
+            "current_url": context_current_url,
+            "language": st.session_state.language
+        }
+        
+        # Customer editor
+        st.write("Customer")
+        customer_id = st.selectbox(
+            "Customer ID",
+            options=CUSTOMER_IDS,
+            key="customer_id",
+            format_func=lambda x: "Nepřihlášený zákazník" if x == "anonymous" else x
+        )
+
+        st.session_state.customer = {
+            "customer_id": customer_id
+        }
+
+# Hlavní chat oblast
+st.title("Chat s e-commerce AI asistenkou")
+
+# Zobrazení chat historie
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+
+# Chat input
+if customer_message := st.chat_input("Napište svoji zprávu..."):
+    # Přidání uživatelské zprávy do historie
+    st.session_state.customer_message = customer_message
+    st.session_state.messages.append({"role": "user", "content": customer_message})
+    with st.chat_message("user"):
+        st.markdown(customer_message)
+
+    try:
+        pf = PFClient()
+        
+        # Příprava dat pro flow
+        flow_inputs = {
+            "customer_input": st.session_state.customer_message,
+            "chat_history": st.session_state.chat_history,
+            "context": st.session_state.context,
+            "customer": st.session_state.customer
+        }
+        
+        # Spuštění flow
+        flow_result = pf.test(flow="flow", inputs=flow_inputs)
+        
+        # Získání outputů z flow
+        assistant_response = flow_result["response"]["answer"]
+        recommended_products = flow_result["response"]["recommended_products"]
+        st.session_state.chat_history = flow_result["chat_history"]
+        st.session_state.context = flow_result["context"]
+        st.session_state.customer = flow_result["customer"]
+        
+        # Přidání odpovědi asistenta do historie
+        st.session_state.messages.append({"role": "assistant", "content": assistant_response})
+        with st.chat_message("assistant"):
+            st.markdown(assistant_response)
             
-    # Debug informace
+    except Exception as e:
+        st.error(f"Došlo k chybě při zpracování požadavku: {str(e)}")
+
+# Debug informace v sidebaru
+with st.sidebar:
     if st.checkbox("Zobrazit debug informace"):
         st.write("Context:", st.session_state.context)
         st.write("Customer:", st.session_state.customer)
-        st.write("Messages:", st.session_state.messages)
+        st.write("Chat History:", st.session_state.chat_history)

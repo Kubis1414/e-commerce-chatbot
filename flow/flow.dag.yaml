@@ -1,8 +1,7 @@
 inputs:
   customer_input:
     type: string
-    default: "jaký telefon si mám koupit¨, chtěl bych novej ihpeopn bud iphone 15
-      pro nebo 16 pro, ajký si mám vybrat? "
+    default: ""
   chat_history:
     type: list
   context:
@@ -10,8 +9,10 @@ inputs:
     default: {}
   customer:
     type: object
-    default:
-      customer_id: CUS905621345
+    default: {}
+  llm_provider:
+    type: string
+    default: ""
 outputs:
   response:
     type: string

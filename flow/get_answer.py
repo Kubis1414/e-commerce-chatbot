@@ -68,7 +68,6 @@ def get_answer(customer_input: str, documents: List[str], context: dict, custome
     ''')
     
     data = {
-       
         "customer_input": customer_input,
         "chat_history": chat_history,
         "documents": documents,
@@ -83,7 +82,6 @@ def get_answer(customer_input: str, documents: List[str], context: dict, custome
     response = output_data.get("parsed")
     
     answer = response.answer
-    recommended_products = response.recommended_products
     
     chat_history.append({"customer_input": customer_input, "assistant_answer": answer})
     
@@ -93,5 +91,7 @@ def get_answer(customer_input: str, documents: List[str], context: dict, custome
         context=context,
         customer=customer
     )
+    
+    print(output.model_dump())
     
     return output.model_dump()
