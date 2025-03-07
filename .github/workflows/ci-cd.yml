@@ -23,6 +23,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Nastavení Google credentials
+        run: |
+          echo '${{ secrets.GOOGLE_CREDENTIALS_JSON }}' > google-credentials.json
+          export GOOGLE_APPLICATION_CREDENTIALS="$(pwd)/google-credentials.json"
+
       - name: Spuštění testů
         run: |
           export PYTHONPATH=$PYTHONPATH:$(pwd)
