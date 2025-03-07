@@ -82,8 +82,8 @@ def get_answer(customer_input: str, documents: List[str], context: dict, custome
     output_data = chain.invoke(data)
     response = output_data.get("parsed")
     
-    answer = response.get("answer", "")
-    recommended_products = response.get("recommended_products", [])
+    answer = response.answer
+    recommended_products = response.recommended_products
     
     chat_history.append({"customer_input": customer_input, "assistant_answer": answer})
     
