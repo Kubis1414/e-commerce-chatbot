@@ -6,6 +6,8 @@ setup(
     packages=find_packages(),
     install_requires=[
         "streamlit",
-        "promptflow"
+        "promptflow",
+        "langchain",
+        "pydantic",     
     ]
 )
