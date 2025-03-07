@@ -24,9 +24,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Nastavení Google credentials
-        run: |
-          echo '${{ secrets.GOOGLE_CREDENTIALS_JSON }}' > google-credentials.json
-          export GOOGLE_APPLICATION_CREDENTIALS="$(pwd)/google-credentials.json"
+        run: echo '${{ secrets.GOOGLE_CREDENTIALS_JSON }}' > google-credentials.json
 
       - name: Spuštění testů
         run: |
@@ -36,6 +34,7 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GOOGLE_APPLICATION_CREDENTIALS: google-credentials.json
 
   deploy:
     if: github.ref == 'refs/heads/main'
