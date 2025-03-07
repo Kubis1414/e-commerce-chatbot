@@ -24,7 +24,9 @@ jobs:
           pip install -r tests/requirements-test.txt
 
       - name: Spuštění testů
-        run: pytest tests
+        run: |
+          export PYTHONPATH=$PYTHONPATH:$(pwd)
+          pytest tests
 
   deploy:
     if: github.ref == 'refs/heads/main'
