@@ -4,6 +4,7 @@ inputs:
     default: ""
   chat_history:
     type: list
+    default: []
   context:
     type: object
     default: {}
@@ -12,7 +13,7 @@ inputs:
     default: {}
   llm_provider:
     type: string
-    default: ""
+    default: OPENAI
 outputs:
   response:
     type: string
@@ -43,6 +44,7 @@ nodes:
     customer_input: ${inputs.customer_input}
     chat_history: ${inputs.chat_history}
     context: ${inputs.context}
+    llm_provider: ${inputs.llm_provider}
 - name: get_documents_from_vector_db
   type: python
   source:
@@ -61,3 +63,4 @@ nodes:
     context: ${inputs.context}
     chat_history: ${inputs.chat_history}
     customer: ${get_customer_info.output}
+    llm_provider: ${inputs.llm_provider}

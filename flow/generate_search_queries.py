@@ -12,11 +12,13 @@ class OutputSchema(BaseModel):
 
 
 @tool
-def generate_search_queries(customer_input: str, chat_history: list, context: dict) -> list[str]:
+def generate_search_queries(customer_input: str, chat_history: list, context: dict, llm_provider: str) -> list[str]:
     search_queries = []
-    
-    llm = Models.gemini_mini
-    
+    print(llm_provider)
+    llm = Models.get_model(llm_provider, "mini")
+    if not llm:
+        raise ValueError(f"Nepodporovaný poskytovatel LLM: {llm_provider}")
+        
     prompt = PromptTemplate.from_template('''
         Create a prompt that generates a list of search queries based on customer inquiries. 
         Use the chat history and context to ensure all technical details and product names are retained. 

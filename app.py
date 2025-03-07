@@ -64,6 +64,18 @@ LANGUAGES = {
     "DE": "Němčina"
 }
 
+# Mapování LLM providerů
+LLM_PROVIDERS = {
+    "GOOGLE": "Google Gemini",
+    "XAI": "XAI Grok",
+    "OPENAI": "OpenAI GPT",
+    "ANTHROPIC": "Anthropic Claude"
+}
+
+# Inicializace LLM providera v session state pokud neexistuje
+if "llm_provider" not in st.session_state:
+    st.session_state.llm_provider = "GOOGLE"
+
 # Vytvoření layoutu
 with st.sidebar:
     with st.expander("Nastavení", expanded=True):
@@ -88,7 +100,7 @@ with st.sidebar:
         st.session_state.context = {
             "page_title": PAGE_TITLES[selected_title_index],
             "current_url": context_current_url,
-            "language": st.session_state.language
+            "language": st.session_state.language,
         }
         
         # Customer editor
@@ -103,16 +115,29 @@ with st.sidebar:
         st.session_state.customer = {
             "customer_id": customer_id
         }
+        
+        # LLM Provider selector
+        selected_provider = st.selectbox(
+            "LLM Provider",
+            options=list(LLM_PROVIDERS.keys()),
+            format_func=lambda x: LLM_PROVIDERS[x],
+            key="llm_provider"
+        )
 
-# Hlavní chat oblast
 st.title("Chat s e-commerce AI asistenkou")
 
-# Zobrazení chat historie
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+chat_container = st.container()
+with chat_container:
+    # Vytvoření scrollovatelného kontejneru pro chat
+    with st.container():
+        st.markdown('<div class="chat-container">', unsafe_allow_html=True)
+        # Zobrazení chat historie
+        for message in st.session_state.messages:
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
+        st.markdown('</div>', unsafe_allow_html=True)
 
-# Chat input
+# Chat input zůstává pod scrollovatelnou oblastí
 if customer_message := st.chat_input("Napište svoji zprávu..."):
     # Přidání uživatelské zprávy do historie
     st.session_state.customer_message = customer_message
@@ -128,7 +153,8 @@ if customer_message := st.chat_input("Napište svoji zprávu..."):
             "customer_input": st.session_state.customer_message,
             "chat_history": st.session_state.chat_history,
             "context": st.session_state.context,
-            "customer": st.session_state.customer
+            "customer": st.session_state.customer,
+            "llm_provider": st.session_state.llm_provider
         }
         
         # Spuštění flow
