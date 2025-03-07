@@ -88,7 +88,7 @@ def get_answer(customer_input: str, documents: List[str], context: dict, custome
     chat_history.append({"customer_input": customer_input, "assistant_answer": answer})
     
     output = Output(
-        response=response,
+        response=response.model_dump(),
         chat_history=chat_history,
         context=context,
         customer=customer
