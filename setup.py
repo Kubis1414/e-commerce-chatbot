@@ -1,10 +1,13 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="chat",
-    version="0.1.0",
+    name="e-commerce-chatbot",
+    version="0.1",
     packages=find_packages(),
-    install_requires=[],
-    python_requires=">=3.9",
-    include_package_data=True,
+    install_requires=[
+        "streamlit",
+        "promptflow",
+        "langchain",
+        "pydantic",     
+    ]
 )

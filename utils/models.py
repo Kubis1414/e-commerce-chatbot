@@ -9,6 +9,7 @@ from .config import OPENAI_MODEL, OPENAI_MINI_MODEL, GEMINI_MODEL, GEMINI_MINI_M
 # Načtení proměnných z .env souboru
 load_dotenv()
 
+
 class Models:
     openai = ChatOpenAI(
         model_name=OPENAI_MODEL,
@@ -87,3 +88,39 @@ class Models:
         base_url="https://api.x.ai/v1",
         api_key=os.environ.get("XAI_API_KEY")
     )
+
+
+    def get_model(provider: str, model_type: str = "normal"):
+        """Vrátí příslušný model podle zadaného poskytovatele a typu.
+        
+        Args:
+            provider: Poskytovatel LLM ("GOOGLE", "XAI", "OPENAI", "ANTHROPIC")
+            model_type: Typ modelu ("mini", "normal", "hot"), výchozí je "normal"
+        """
+        provider_map = {
+            "GOOGLE": {
+                "mini": Models.gemini_mini,
+                "normal": Models.gemini,
+                "hot": Models.gemini_hot
+            },
+            "XAI": {
+                "mini": Models.grok_mini,
+                "normal": Models.grok,
+                "hot": Models.grok_hot
+            },
+            "OPENAI": {
+                "mini": Models.openai_mini,
+                "normal": Models.openai,
+                "hot": Models.openai_hot
+            },
+            "ANTHROPIC": {
+                "mini": Models.anthropic_mini,
+                "normal": Models.anthropic,
+                "hot": Models.anthropic_hot
+            }
+        }
+        
+        if provider not in provider_map:
+            return None
+            
+        return provider_map[provider].get(model_type)

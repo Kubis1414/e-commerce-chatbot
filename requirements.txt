@@ -1,3 +1,4 @@
+# Main dependencies
 streamlit
 openai
 requests
@@ -7,10 +8,13 @@ promptflow-core
 promptflow-devkit
 promptflow-azure
 promptflow-tracing
-faiss-cpu
-sentence_transformers
 langchain
 langchain_google_genai
 langchain_openai
 langchain_anthropic
 -e .
+
+# Testing dependencies
+pytest
+pytest-cov
+pytest-mock
