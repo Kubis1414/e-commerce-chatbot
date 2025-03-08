@@ -66,6 +66,6 @@ jobs:
           fi
           source venv/bin/activate
           pip install -r requirements.txt
-          systemctl restart ecommerce_chatbot.service
-          systemctl status ecommerce_chatbot.service
+          sudo systemctl restart ecommerce_chatbot.service
+          sudo systemctl status ecommerce_chatbot.service
           EOF
