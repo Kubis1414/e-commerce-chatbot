@@ -32,7 +32,7 @@ class Output(BaseModel):
 
 
 @tool
-def get_answer(customer_input: str, documents: List[str], context: dict, customer: dict, chat_history: list, llm_provider: str) -> Output:
+def get_answer(customer_input: str, documents: List[str], context: dict, customer: dict, chat_history: list, llm_provider: str) -> dict:
     llm = Models.get_model(llm_provider)
     if not llm:
         raise ValueError(f"Nepodporovaný poskytovatel LLM: {llm_provider}")
