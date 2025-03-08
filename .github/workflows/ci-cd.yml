@@ -56,6 +56,7 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=yes -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} <<EOF
           set -e # Ukončí skript hned při chybě
+          rm -rf ~/chat
           git clone git@github.com:Kubis1414/e-commerce-chatbot.git ~/chat
           cd ~/chat
           echo "${{ secrets.ENV_VARS }}" > .env
