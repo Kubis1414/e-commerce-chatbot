@@ -64,6 +64,10 @@ jobs:
           TIMESTAMP=$(date +%Y%m%d%H%M%S)
           DEPLOY_DIR=$RELEASE_DIR_BASE/release-$TIMESTAMP
 
+          echo "DEBUG: RELEASE_DIR_BASE: '$RELEASE_DIR_BASE'"
+          echo "DEBUG: TIMESTAMP: '$TIMESTAMP'"
+          echo "DEBUG: DEPLOY_DIR: '$DEPLOY_DIR'"
+          
           echo "Vytvářím nový release directory: $DEPLOY_DIR"
           mkdir -p "$DEPLOY_DIR"
 
