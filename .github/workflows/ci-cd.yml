@@ -24,7 +24,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Nastavení Google credentials
-        run: echo '${{ secrets.GOOGLE_CREDENTIALS_JSON }}' > google-credentials.json
+        run: echo ${{ secrets.GOOGLE_CREDENTIALS_JSON }} > google-credentials.json
 
       - name: Spuštění testů
         run: |
@@ -42,39 +42,36 @@ jobs:
     runs-on: ubuntu-latest
     env:
       RELEASE_DIR_BASE: ~/chat_releases
+      CURRENT_RELEASE_LINK: ~/chat_releases/current
     steps:
       - name: Checkout kódu
         uses: actions/checkout@v2
       - name: Přidání host key serveru do known_hosts
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SERVER_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          echo ${{ secrets.SERVER_KNOWN_HOSTS }} > ~/.ssh/known_hosts
       - name: Přidání SSH klíče
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
+          echo ${{ secrets.SERVER_SSH_KEY }} > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
       - name: Get current date
         id: date
-        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+        run: echo "::set-output name=date::$(date +'%Y-%m-%dT%H:%M:%S')"
       - name: Připojení k serveru a nasazení Blue/Green
         run: |
           ssh -o StrictHostKeyChecking=yes -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} <<EOF
           set -e
-
-          echo "DEBUG: RELEASE_DIR_BASE: '$RELEASE_DIR_BASE'"
-          echo "DEBUG: TIMESTAMP: '$TIMESTAMP'"
-          echo "DEBUG: DEPLOY_DIR: '$DEPLOY_DIR'"
           
           echo "Vytvářím nový release directory: $DEPLOY_DIR"
           mkdir -p "$DEPLOY_DIR"
 
           echo "Klonuji repository do $DEPLOY_DIR"
           git clone git@github.com:Kubis1414/e-commerce-chatbot.git "$DEPLOY_DIR"
-          cd "$DEPLOY_DIR"
+          cd $DEPLOY_DIR
 
           echo "Zapisuji .env soubor"
-          echo "${{ secrets.ENV_VARS }}" > .env
+          echo ${{ secrets.ENV_VARS }} > .env
 
           echo "Vytvářím virtuální prostředí, pokud neexistuje"
           if [ ! -d "venv" ]; then
@@ -96,48 +93,41 @@ jobs:
       - name: Pre-deploy testy na serveru
         run: |
           ssh -o StrictHostKeyChecking=yes -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} <<EOF
-          DEPLOY_DIR=~/chat_releases/release-\*  # Použijeme wildcard pro nalezení posledního release directory
 
           echo "Přepínám do deployment directory: $DEPLOY_DIR"
-          cd "$DEPLOY_DIR"
+          cd $DEPLOY_DIR
 
           echo "Aktivuji virtuální prostředí pro testy"
           source venv/bin/activate
 
           echo "Spouštím testy v pre-produkčním prostředí"
           export PYTHONPATH=$PYTHONPATH:$(pwd)
-          pytest tests # Stejný příkaz jako v jobu 'test'
+          pytest tests
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GOOGLE_APPLICATION_CREDENTIALS: google-credentials.json
+          DEPLOY_DIR: ${{ env.RELEASE_DIR_BASE }}/release-${{ steps.date.outputs.date }}
       - name: Přepojení symlinku a restart produkce
         if: success()
         run: |
           ssh -o StrictHostKeyChecking=yes -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} <<EOF
           set -e
 
-          RELEASE_DIR_BASE=~/chat_releases
-          CURRENT_RELEASE_LINK=$RELEASE_DIR_BASE/current
-          PREVIOUS_RELEASE_DIR=$RELEASE_DIR_BASE/release-previous
-          NEW_RELEASE_DIR=$RELEASE_DIR_BASE/release-new
-          TIMESTAMP=$(date +%Y%m%d%H%M%S)
-          DEPLOY_DIR=$RELEASE_DIR_BASE/release-$TIMESTAMP # Adresář pro aktuální release s timestampem
-
           echo "Deaktivuji virtuální prostředí (pro jistotu, i když by už nemělo být aktivní)"
           deactivate
 
           echo "Přepínám symbolický link current"
-          if [ -L "$CURRENT_RELEASE_LINK" ]; then
+          if [ -L ${{env.CURRENT_RELEASE_LINK}} ]; then
             echo "Aktuální release link existuje."
-            CURRENT_TARGET=$(readlink "$CURRENT_RELEASE_LINK")
-            echo "Aktuální release je: $CURRENT_TARGET"
-            if [ -d "$CURRENT_TARGET" ]; then
-              echo "Přesouvám aktuální release $CURRENT_TARGET do $PREVIOUS_RELEASE_DIR"
-              mv "$CURRENT_TARGET" "$PREVIOUS_TARGET"
+            
+            echo "Aktuální release je: ${{env.CURRENT_TARGET}}"
+            if [ -d ${{env.CURRENT_TARGET}} ]; then
+              echo "Přesouvám aktuální release ${{env.CURRENT_TARGET}} do ${{env.PREVIOUS_RELEASE_DIR}}"
+              mv ${{env.CURRENT_TARGET}} ${{env.PREVIOUS_RELEASE_DIR}}
             else
-              echo "WARN: Aktuální release target $CURRENT_TARGET neexistuje! Nemohu přesunout do $PREVIOUS_RELEASE_DIR."
+              echo "WARN: Aktuální release target ${{env.CURRENT_TARGET}} neexistuje! Nemohu přesunout do ${{env.PREVIOUS_RELEASE_DIR}}"
             fi
           fi
           echo "Vytvářím nový symbolický link $CURRENT_RELEASE_LINK -> $DEPLOY_DIR"
@@ -150,3 +140,8 @@ jobs:
 
           echo "Dokončeno nasazení Blue/Green release do $DEPLOY_DIR, current link ukazuje na $CURRENT_RELEASE_LINK"
           EOF
+        env:
+          PREVIOUS_RELEASE_DIR: ${{ env.RELEASE_DIR_BASE }}/release-previous
+          NEW_RELEASE_DIR: ${{ env.RELEASE_DIR_BASE }}/release-new
+          DEPLOY_DIR: ${{ env.RELEASE_DIR_BASE }}/release-${{ steps.date.outputs.date }}
+          CURRENT_TARGET: readlink ${{env.CURRENT_RELEASE_LINK}}
