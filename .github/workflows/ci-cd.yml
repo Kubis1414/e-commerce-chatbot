@@ -61,7 +61,7 @@ jobs:
           CURRENT_RELEASE_LINK=$RELEASE_DIR_BASE/current
           PREVIOUS_RELEASE_DIR=$RELEASE_DIR_BASE/release-previous
           NEW_RELEASE_DIR=$RELEASE_DIR_BASE/release-new
-          TIMESTAMP=$(date +%Y%m%d%H%M%S)
+          TIMESTAMP=$(date +%Y%m%dT%H%M%SZ)
           DEPLOY_DIR=$RELEASE_DIR_BASE/release-$TIMESTAMP
 
           echo "DEBUG: RELEASE_DIR_BASE: '$RELEASE_DIR_BASE'"
