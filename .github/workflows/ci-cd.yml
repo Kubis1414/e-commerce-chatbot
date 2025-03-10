@@ -135,11 +135,15 @@ jobs:
           EOF
         env:
           DEPLOY_DIR: ${{ env.RELEASE_DIR_BASE }}/release-${{ steps.date.outputs.date }}
-        
+      - name: tests    
+        run: |
+          ssh -o StrictHostKeyChecking=yes -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} \
+          "ls -d ~/chat_releases/release-* | sort -r > /tmp/release_dirs.txt && cat /tmp/release_dirs.txt"
       - name: Úklid starých releases # NOVÝ KROK - ÚKLID STARÝCH RELEASES (BEZ $())
         run: |
           ssh -o StrictHostKeyChecking=yes -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} <<EOF
           set -e
+          set -x
 
           echo "Spouštím úklid starých releases, ponechávám 3 nejnovější (bez $()...)"
 
