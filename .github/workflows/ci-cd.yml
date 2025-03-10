@@ -131,7 +131,7 @@ jobs:
             fi
           fi
           echo "Vytvářím nový symbolický link $CURRENT_RELEASE_LINK -> $DEPLOY_DIR"
-          ln -s "$DEPLOY_DIR" "$CURRENT_RELEASE_LINK"
+          ln -s $DEPLOY_DIR $CURRENT_RELEASE_LINK
 
           echo "Restartuji systemd service ecommerce_chatbot.service"
           sudo systemctl restart ecommerce_chatbot.service
