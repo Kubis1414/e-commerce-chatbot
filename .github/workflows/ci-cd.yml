@@ -147,14 +147,14 @@ jobs:
 
           echo "Spouštím úklid starých releases, ponechávám 3 nejnovější..."
           RELEASE_DIRS=$(ls -d ${{env.RELEASE_DIR_BASE}}/release-* | sort -r) # Seznam release adresářů, seřazených od nejnovějšího
-          TO_DELETE=$(echo "$RELEASE_DIRS" | tail -n +4) # Vybereme adresáře KROMĚ 3 nejnovějších (tedy ty, co chceme smazat)
+          TO_DELETE=$(echo $RELEASE_DIRS | tail -n +4) # Vybereme adresáře KROMĚ 3 nejnovějších (tedy ty, co chceme smazat)
 
-          if [ -n "$TO_DELETE" ]; then # Pokud existují adresáře ke smazání
+          if [ -n $TO_DELETE ]; then # Pokud existují adresáře ke smazání
               while IFS= read -r dir; do # Procházíme seznam adresářů k smazání
                   echo "Mažu starý release: $dir"
-                  rm -rf "$dir" # SMAŽEME STARÝ RELEASE! POZOR NA TENTO PŘÍKAZ! DŮKLADNĚ OTESTOVAT!
+                  rm -rf $dir
                   echo "Release $dir smazán."
-              done <<< "$TO_DELETE"
+              done <<< $TO_DELETE
           else
               echo "Žádné staré releases k smazání (ponechávám 3 nejnovější)."
           fi
