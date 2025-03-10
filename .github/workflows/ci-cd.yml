@@ -146,7 +146,7 @@ jobs:
           # 1. Seznam release adresářů a seřazení do souboru
           echo "Vylistovávám release adresáře a řadím je (do souboru)..."
           echo "ls -d ~/chat_releases/release-* | sort -r"
-          echo soubory=(ls -d ~/chat_releases/release-* | sort -r)
+          echo soubory=$(ls -d ~/chat_releases/release-* | sort -r)
           ls -d ${{env.RELEASE_DIR_BASE}}/release-* | sort -r > /tmp/release_dirs.txt # Výstup do souboru /tmp/release_dirs.txt
           echo "Seznam release adresářů seřazen, výstup v /tmp/release_dirs.txt"
 
