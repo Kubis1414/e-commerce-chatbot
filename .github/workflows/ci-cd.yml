@@ -118,30 +118,32 @@ jobs:
           ssh -o StrictHostKeyChecking=yes -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} <<EOF
           set -e
 
-          echo "Přepínám symbolický link current"
+          echo "Přepínám symbolický link current na nový release..."
           if [ -L ${{env.CURRENT_RELEASE_LINK}} ]; then
-            echo "Aktuální release link existuje."
-            
-            echo "Aktuální release je: ${{env.CURRENT_TARGET}}"
-            if [ -d ${{env.CURRENT_TARGET}} ]; then
-              echo "Přesouvám aktuální release ${{env.CURRENT_TARGET}} do ${{env.PREVIOUS_RELEASE_DIR}}"
-              mv ${{env.CURRENT_TARGET}} ${{env.PREVIOUS_RELEASE_DIR}}
+            echo "Aktuální 'current' symlink existuje."
+
+            CURRENT_TARGET=readlink ${{env.CURRENT_RELEASE_LINK}} # Získání cíle symlinku
+            echo "Aktuální 'current' symlink ukazuje na: $CURRENT_TARGET"
+            if [ -d $CURRENT_TARGET ]; then
+              echo "Přesouvám aktuální release '$CURRENT_TARGET' do ${{env.PREVIOUS_RELEASE_DIR}}"
+              mv $CURRENT_TARGET ${{env.PREVIOUS_RELEASE_DIR}}
             else
-              echo "WARN: Aktuální release target ${{env.CURRENT_TARGET}} neexistuje! Nemohu přesunout do ${{env.PREVIOUS_RELEASE_DIR}}"
+              echo "WARN: Cíl aktuálního 'current' symlinku '$CURRENT_TARGET' neexistuje! Nemohu přesunout do ${{env.PREVIOUS_RELEASE_DIR}}"
             fi
           fi
-          echo "Vytvářím nový symbolický link $CURRENT_RELEASE_LINK -> $DEPLOY_DIR"
-          ln -s $DEPLOY_DIR $CURRENT_RELEASE_LINK
+
+          echo "Vytvářím nový symlink '${{env.CURRENT_RELEASE_LINK}}' -> '$DEPLOY_DIR'" # Uvozovky pro lepší čitelnost
+          ln -s $DEPLOY_DIR ${{env.CURRENT_RELEASE_LINK}} # Uvozovky pro cesty s mezerami
 
           echo "Restartuji systemd service ecommerce_chatbot.service"
           sudo systemctl restart ecommerce_chatbot.service
           echo "Kontroluji status systemd service ecommerce_chatbot.service"
           sudo systemctl status ecommerce_chatbot.service
 
-          echo "Dokončeno nasazení Blue/Green release do $DEPLOY_DIR, current link ukazuje na $CURRENT_RELEASE_LINK"
+          echo "Dokončeno přepnutí 'current' symlink na nový release v '$DEPLOY_DIR', 'current' nyní ukazuje na '${{env.CURRENT_RELEASE_LINK}}'" # Uvozovky
           EOF
         env:
           PREVIOUS_RELEASE_DIR: ${{ env.RELEASE_DIR_BASE }}/release-previous
           NEW_RELEASE_DIR: ${{ env.RELEASE_DIR_BASE }}/release-new
           DEPLOY_DIR: ${{ env.RELEASE_DIR_BASE }}/release-${{ steps.date.outputs.date }}
-          CURRENT_TARGET: readlink ${{env.CURRENT_RELEASE_LINK}}
+          CURRENT_TARGET: readlink ${{env.CURRENT_RELEASE_LINK}} # Toto se v skriptu už nepoužívá, lze smazat environment variable
