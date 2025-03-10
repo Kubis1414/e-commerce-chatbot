@@ -71,7 +71,7 @@ jobs:
           cd $DEPLOY_DIR
 
           echo "Zapisuji .env soubor"
-          echo ${{ secrets.ENV_VARS }} > .env
+          echo "${{ secrets.ENV_VARS }}" > .env
 
           echo "Vytvářím virtuální prostředí, pokud neexistuje"
           if [ ! -d "venv" ]; then
@@ -98,8 +98,8 @@ jobs:
           cd $DEPLOY_DIR
 
           echo "Zapisuji .env soubor"
-          echo ${{ secrets.ENV_VARS }} > .env
-          
+          echo "${{ secrets.ENV_VARS }}" > .env
+
           echo "Aktivuji virtuální prostředí pro testy"
           source venv/bin/activate
 
