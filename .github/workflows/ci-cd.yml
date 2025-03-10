@@ -42,7 +42,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       RELEASE_DIR_BASE: ~/chat_releases
-      CURRENT_RELEASE_LINK: ~/chat_releases/current
     steps:
       - name: Checkout kódu
         uses: actions/checkout@v2
@@ -86,9 +85,6 @@ jobs:
           deactivate
           EOF
         env:
-          CURRENT_RELEASE_LINK: ${{ env.RELEASE_DIR_BASE }}/current
-          PREVIOUS_RELEASE_DIR: ${{ env.RELEASE_DIR_BASE }}/release-previous
-          NEW_RELEASE_DIR: ${{ env.RELEASE_DIR_BASE }}/release-new
           DEPLOY_DIR: ${{ env.RELEASE_DIR_BASE }}/release-${{ steps.date.outputs.date }}
       # - name: Pre-deploy testy na serveru
       #   run: |
@@ -175,7 +171,7 @@ jobs:
           rm /tmp/release_dirs.txt /tmp/to_delete.txt
           echo "Dočasné soubory smazány."
 
-
           EOF
+
         env:
-          RELEASE_DIR_BASE: ${{ env.RELEASE_DIR_BASE }} # Důležité, aby úklid věděl, kde hledat releases
+          DEPLOY_DIR: ${{ env.RELEASE_DIR_BASE }}/release-${{ steps.date.outputs.date }}
