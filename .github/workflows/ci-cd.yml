@@ -160,6 +160,7 @@ jobs:
 
           # 3. Mazání adresářů ze seznamu v souboru /tmp/to_delete.txt
           echo "Mažu staré releases podle seznamu v /tmp/to_delete.txt..."
+          cat /tmp/to_delete.txt
           if [ -s /tmp/to_delete.txt ]; then # Pokud soubor /tmp/to_delete.txt NENÍ prázdný (-s test)
               while IFS= read -r dir; do # Procházíme řádky ze souboru /tmp/to_delete.txt
                   echo "Mažu starý release: $dir"
