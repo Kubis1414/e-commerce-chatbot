@@ -64,10 +64,10 @@ jobs:
           set -e
           
           echo "Vytvářím nový release directory: $DEPLOY_DIR"
-          mkdir -p "$DEPLOY_DIR"
+          mkdir -p $DEPLOY_DIR
 
           echo "Klonuji repository do $DEPLOY_DIR"
-          git clone git@github.com:Kubis1414/e-commerce-chatbot.git "$DEPLOY_DIR"
+          git clone git@github.com:Kubis1414/e-commerce-chatbot.git $DEPLOY_DIR
           cd $DEPLOY_DIR
 
           echo "Zapisuji .env soubor"
