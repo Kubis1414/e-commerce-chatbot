@@ -118,9 +118,6 @@ jobs:
           ssh -o StrictHostKeyChecking=yes -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} <<EOF
           set -e
 
-          echo "Deaktivuji virtuální prostředí (pro jistotu, i když by už nemělo být aktivní)"
-          deactivate
-
           echo "Přepínám symbolický link current"
           if [ -L ${{env.CURRENT_RELEASE_LINK}} ]; then
             echo "Aktuální release link existuje."
