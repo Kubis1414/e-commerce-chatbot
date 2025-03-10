@@ -97,6 +97,9 @@ jobs:
           echo "Přepínám do deployment directory: $DEPLOY_DIR"
           cd $DEPLOY_DIR
 
+          echo "Zapisuji .env soubor"
+          echo ${{ secrets.ENV_VARS }} > .env
+          
           echo "Aktivuji virtuální prostředí pro testy"
           source venv/bin/activate
 
