@@ -121,8 +121,6 @@ jobs:
           echo "Přepínám symbolický link current na nový release..."
           if [ -L ${{env.CURRENT_RELEASE_LINK}} ]; then
             echo "Aktuální 'current' symlink existuje."
-
-            CURRENT_TARGET=readlink ${{env.CURRENT_RELEASE_LINK}} # Získání cíle symlinku
             echo $CURRENT_TARGET
             echo "Aktuální 'current' symlink ukazuje na: $CURRENT_TARGET"
             if [ -d $CURRENT_TARGET ]; then
