@@ -53,7 +53,7 @@ jobs:
       - name: Přidání SSH klíče
         run: |
           mkdir -p ~/.ssh
-          echo ${{ secrets.SERVER_SSH_KEY }} > ~/.ssh/id_rsa
+          echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
       - name: Get current date
         id: date
