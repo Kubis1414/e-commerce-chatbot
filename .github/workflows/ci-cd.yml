@@ -113,41 +113,28 @@ jobs:
       #     GOOGLE_APPLICATION_CREDENTIALS: google-credentials.json
       #     DEPLOY_DIR: ${{ env.RELEASE_DIR_BASE }}/release-${{ steps.date.outputs.date }}
       - name: Přepojení symlinku a restart produkce
-        # if: success()
+        if: success()
         run: |
           ssh -o StrictHostKeyChecking=yes -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} <<EOF
           set -e
-          echo "Testuji command substitution..."
-          DATUM=$(date +%Y-%m-%d)
-          echo "Proměnná DATUM má hodnotu: $DATUM" # Mělo by vypsat aktuální datum ve formátu YYYY-MM-DD
-          echo "Test command substitution OK."
-          
+
           echo "Přepínám symbolický link current na nový release..."
-          if [ -L ${{env.CURRENT_RELEASE_LINK}} ]; then
-            echo "Aktuální 'current' symlink existuje."
-            CURRENT_TARGET=$(readlink ~/chat_releases/current) 
-            echo $CURRENT_TARGET
-            echo "Aktuální 'current' symlink ukazuje na: $CURRENT_TARGET"
-            if [ -d $CURRENT_TARGET ]; then
-              echo "Přesouvám aktuální release '$CURRENT_TARGET' do ${{env.PREVIOUS_RELEASE_DIR}}"
-              mv $CURRENT_TARGET ${{env.PREVIOUS_RELEASE_DIR}}
-            else
-              echo "WARN: Cíl aktuálního 'current' symlinku '$CURRENT_TARGET' neexistuje! Nemohu přesunout do ${{env.PREVIOUS_RELEASE_DIR}}"
-            fi
+          if [ -L ~/chat_releases/current ]; then
+            echo "Aktuální 'current' symlink existuje. Odstraňuji ho..."
+            rm ~/chat_releases/current
+          else
+            echo "Aktuální 'current' symlink NEEXISTUJE."
           fi
 
-          echo "Vytvářím nový symlink '${{env.CURRENT_RELEASE_LINK}}' -> '$DEPLOY_DIR'" # Uvozovky pro lepší čitelnost
-          ln -s $DEPLOY_DIR ${{env.CURRENT_RELEASE_LINK}} # Uvozovky pro cesty s mezerami
+          echo "Vytvářím nový symlink '~/chat_releases/current' -> '$DEPLOY_DIR'"
+          ln -s $DEPLOY_DIR ~/chat_releases/current
 
           echo "Restartuji systemd service ecommerce_chatbot.service"
           sudo systemctl restart ecommerce_chatbot.service
           echo "Kontroluji status systemd service ecommerce_chatbot.service"
           sudo systemctl status ecommerce_chatbot.service
 
-          echo "Dokončeno přepnutí 'current' symlink na nový release v '$DEPLOY_DIR', 'current' nyní ukazuje na '${{env.CURRENT_RELEASE_LINK}}'" # Uvozovky
+          echo "Dokončeno přepnutí 'current' symlink na nový release v '$DEPLOY_DIR', 'current' nyní ukazuje na '~/chat_releases/current'"
           EOF
         env:
-          PREVIOUS_RELEASE_DIR: ${{ env.RELEASE_DIR_BASE }}/release-previous
-          NEW_RELEASE_DIR: ${{ env.RELEASE_DIR_BASE }}/release-new
           DEPLOY_DIR: ${{ env.RELEASE_DIR_BASE }}/release-${{ steps.date.outputs.date }}
-          CURRENT_TARGET: readlink ${{env.CURRENT_RELEASE_LINK}} # Toto se v skriptu už nepoužívá, lze smazat environment variable
