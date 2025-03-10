@@ -140,25 +140,41 @@ jobs:
         env:
           DEPLOY_DIR: ${{ env.RELEASE_DIR_BASE }}/release-${{ steps.date.outputs.date }}
         
-      - name: Úklid starých releases
+      - name: Úklid starých releases # NOVÝ KROK - ÚKLID STARÝCH RELEASES (BEZ $())
         run: |
           ssh -o StrictHostKeyChecking=yes -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} <<EOF
           set -e
 
-          echo "Spouštím úklid starých releases, ponechávám 3 nejnovější..."
-          RELEASE_DIRS=$(ls -d ${{env.RELEASE_DIR_BASE}}/release-* | sort -r) # Seznam release adresářů, seřazených od nejnovějšího
-          TO_DELETE=$(echo $RELEASE_DIRS | tail -n +4) # Vybereme adresáře KROMĚ 3 nejnovějších (tedy ty, co chceme smazat)
+          echo "Spouštím úklid starých releases, ponechávám 3 nejnovější (bez $()...)"
 
-          if [ -n $TO_DELETE ]; then # Pokud existují adresáře ke smazání
-              while IFS= read -r dir; do # Procházíme seznam adresářů k smazání
+          # 1. Seznam release adresářů a seřazení do souboru
+          echo "Vylistovávám release adresáře a řadím je (do souboru)..."
+          ls -d ${{env.RELEASE_DIR_BASE}}/release-* | sort -r > /tmp/release_dirs.txt # Výstup do souboru /tmp/release_dirs.txt
+          echo "Seznam release adresářů seřazen, výstup v /tmp/release_dirs.txt"
+
+          # 2. Výběr adresářů ke smazání (kromě 3 nejnovějších) do souboru
+          echo "Vybírám adresáře ke smazání (kromě 3 nejnovějších) do souboru..."
+          tail -n +4 /tmp/release_dirs.txt > /tmp/to_delete.txt # Výstup do souboru /tmp/to_delete.txt
+          echo "Seznam adresářů ke smazání vybrán, výstup v /tmp/to_delete.txt"
+
+          # 3. Mazání adresářů ze seznamu v souboru /tmp/to_delete.txt
+          echo "Mažu staré releases podle seznamu v /tmp/to_delete.txt..."
+          if [ -s /tmp/to_delete.txt ]; then # Pokud soubor /tmp/to_delete.txt NENÍ prázdný (-s test)
+              while IFS= read -r dir; do # Procházíme řádky ze souboru /tmp/to_delete.txt
                   echo "Mažu starý release: $dir"
-                  rm -rf $dir
+                  rm -rf "$dir" # SMAŽEME STARÝ RELEASE! POZOR NA TENTO PŘÍKAZ! DŮKLADNĚ OTESTOVAT!
                   echo "Release $dir smazán."
-              done <<< $TO_DELETE
+              done < /tmp/to_delete.txt # Čteme vstup z /tmp/to_delete.txt  (Místo <<< "$TO_DELETE")
           else
               echo "Žádné staré releases k smazání (ponechávám 3 nejnovější)."
           fi
-          echo "Úklid starých releases dokončen."
+          echo "Mazání starých releases dokončeno (bez $())."
+
+          # 4. Smazání dočasných souborů
+          echo "Uklízím dočasné soubory..."
+          rm /tmp/release_dirs.txt /tmp/to_delete.txt
+          echo "Dočasné soubory smazány."
+
 
           EOF
         env:
