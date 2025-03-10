@@ -57,7 +57,7 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
       - name: Get current date
         id: date
-        run: echo "::set-output name=date::$(date +'%Y-%m-%dT%H:%M:%S')"
+        run: echo "::set-output name=date::$(date +'%Y-%m-%dT%H-%M-%S')"
       - name: Připojení k serveru a nasazení Blue/Green
         run: |
           ssh -o StrictHostKeyChecking=yes -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} <<EOF
