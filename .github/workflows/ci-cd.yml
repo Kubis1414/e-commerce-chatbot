@@ -43,7 +43,7 @@ jobs:
     env:
       RELEASE_DIR_BASE: ~/chat_releases
     steps:
-      - name: Checkout kódu
+      - name: Checkout kóduš
         uses: actions/checkout@v2
       - name: Přidání host key serveru do known_hosts
         run: |
@@ -59,6 +59,9 @@ jobs:
       - name: Nasazení kódu pomocí rsync
         run: |
           ssh -o StrictHostKeyChecking=yes -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}
+          set -e
+          set -x
+          
           mkdir -p $DEPLOY_DIR
           rsync -avz --delete --exclude='.git' ./ ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:$DEPLOY_DIR
           
