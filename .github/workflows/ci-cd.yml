@@ -161,18 +161,7 @@ jobs:
           # 3. Mazání adresářů ze seznamu v souboru /tmp/to_delete.txt
           echo "Mažu staré releases podle seznamu v /tmp/to_delete.txt..."
           cat /tmp/to_delete.txt
-          cat /tmp/release_dirs.txt
-          if [ -s /tmp/to_delete.txt ]; then
-          while IFS= read -r dir || [ -n "$dir" ]; do
-              if [ -n "$dir" ]; then
-                  echo "Mažu starý release: $dir"
-                  rm -rf -- "$dir"  # Přidání `--` pro bezpečnost
-                  echo "Release $dir smazán."
-              fi
-          done < /tmp/to_delete.txt
-          else
-            echo "Žádné staré releases k smazání (ponechávám 3 nejnovější)."
-          fi
+          rm -rf $(cat /tmp/to_delete.txt)
           echo "Mazání starých releases dokončeno."
 
           # 4. Smazání dočasných souborů
