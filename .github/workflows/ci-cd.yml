@@ -135,38 +135,29 @@ jobs:
           EOF
         env:
           DEPLOY_DIR: ${{ env.RELEASE_DIR_BASE }}/release-${{ steps.date.outputs.date }}
-      - name: tests    
-        run: |
-          ssh -o StrictHostKeyChecking=yes -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} \
-          "ls -d ~/chat_releases/release-* | sort -r > /tmp/release_dirs.txt && cat /tmp/release_dirs.txt"
-      - name: Úklid starých releases # NOVÝ KROK - ÚKLID STARÝCH RELEASES (BEZ $())
+      - name: Úklid starých releases
         run: |
           ssh -o StrictHostKeyChecking=yes -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} <<EOF
           set -e
-          set -x
 
           echo "Spouštím úklid starých releases, ponechávám 3 nejnovější (bez $()...)"
 
-          # 1. Seznam release adresářů a seřazení do souboru
-          echo "Vylistovávám release adresáře a řadím je (do souboru)..."
+          echo "Listuji release adresáře a řadím je do souboru /tmp/release_dirs.txt ..."
           echo "ls -d ~/chat_releases/release-* | sort -r"
-          ls -d ~/chat_releases/release-* | sort -r > /tmp/release_dirs.txt # Výstup do souboru /tmp/release_dirs.txt
+          ls -d ~/chat_releases/release-* | sort -r > /tmp/release_dirs.txt
           echo "Seznam release adresářů seřazen, výstup v /tmp/release_dirs.txt"
 
-          # 2. Výběr adresářů ke smazání (kromě 3 nejnovějších) do souboru
-          echo "Vybírám adresáře ke smazání (kromě 3 nejnovějších) do souboru..."
-          tail -n +4 /tmp/release_dirs.txt > /tmp/to_delete.txt # Výstup do souboru /tmp/to_delete.txt
+          echo "Vybírám adresáře ke smazání (všechny kromě 3 nejnovějších) do souboru /tmp/to_delete.txt ..."
+          tail -n +4 /tmp/release_dirs.txt > /tmp/to_delete.txt
           echo "Seznam adresářů ke smazání vybrán, výstup v /tmp/to_delete.txt"
 
-          # 3. Mazání adresářů ze seznamu v souboru /tmp/to_delete.txt
           echo "Mažu staré releases podle seznamu v /tmp/to_delete.txt..."
           cat /tmp/to_delete.txt
-          rm -rf $(cat /tmp/to_delete.txt)
+          xargs rm -rf < /tmp/to_delete.txt
           echo "Mazání starých releases dokončeno."
 
-          # 4. Smazání dočasných souborů
           echo "Uklízím dočasné soubory..."
-          xargs rm -rf < /tmp/to_delete.txt
+          rm /tmp/release_dirs.txt /tmp/to_delete.txt
           echo "Dočasné soubory smazány."
 
           EOF
