@@ -54,20 +54,15 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-      - name: Get current date
+      - name: Get current
         id: date
         run: echo "::set-output name=date::$(date +'%Y-%m-%dT%H-%M-%S')"
-      - name: Připojení k serveru a nasazení Blue/Green
+      - name: Get current date
+        run: echo "DATE=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
+      - name: Nasazení kódu pomocí rsync
         run: |
-          ssh -o StrictHostKeyChecking=yes -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} <<EOF
-          set -e
-          
-          echo "Vytvářím nový release directory: $DEPLOY_DIR"
-          mkdir -p $DEPLOY_DIR
-
-          echo "Klonuji repository do $DEPLOY_DIR"
-          git clone git@github.com:Kubis1414/e-commerce-chatbot.git $DEPLOY_DIR
-          cd $DEPLOY_DIR
+          ssh -o StrictHostKeyChecking=yes -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "mkdir -p $DEPLOY_DIR"
+          rsync -avz --delete --exclude='.git' ./ ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:$DEPLOY_DIR
 
           echo "Zapisuji .env soubor"
           echo "${{ secrets.ENV_VARS }}" > .env
@@ -89,7 +84,7 @@ jobs:
           deactivate
           EOF
         env:
-          DEPLOY_DIR: ${{ env.RELEASE_DIR_BASE }}/release-${{ steps.date.outputs.date }}
+          DEPLOY_DIR: ${{ env.RELEASE_DIR_BASE }}/release-${{ env.DATE }}
       - name: Pre-deploy testy na serveru
         run: |
           ssh -o StrictHostKeyChecking=yes -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} <<EOF
@@ -111,7 +106,7 @@ jobs:
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GOOGLE_APPLICATION_CREDENTIALS: google-credentials.json
-          DEPLOY_DIR: ${{ env.RELEASE_DIR_BASE }}/release-${{ steps.date.outputs.date }}
+          DEPLOY_DIR: ${{ env.RELEASE_DIR_BASE }}/release-${{ env.DATE }}
       - name: Přepojení symlinku a restart produkce
         if: success()
         run: |
@@ -130,41 +125,22 @@ jobs:
           ln -s $DEPLOY_DIR ~/chat_releases/current
 
           echo "Restartuji systemd service ecommerce_chatbot.service"
-          sudo systemctl restart ecommerce_chatbot.service
-          echo "Kontroluji status systemd service ecommerce_chatbot.service"
-          sudo systemctl status ecommerce_chatbot.service
+          nohup sudo systemctl restart ecommerce_chatbot.service > /dev/null 2>&1 &
 
           echo "Dokončeno přepnutí 'current' symlink na nový release v '$DEPLOY_DIR', 'current' nyní ukazuje na '~/chat_releases/current'"
 
           EOF
         env:
-          DEPLOY_DIR: ${{ env.RELEASE_DIR_BASE }}/release-${{ steps.date.outputs.date }}
+          DEPLOY_DIR: ${{ env.RELEASE_DIR_BASE }}/release-${{ env.DATE }}
       - name: Úklid starých releases
         run: |
           ssh -o StrictHostKeyChecking=yes -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} <<EOF
           set -e
 
-          echo "Spouštím úklid starých releases, ponechávám 3 nejnovější (bez $()...)"
-
-          echo "Listuji release adresáře a řadím je do souboru /tmp/release_dirs.txt ..."
-          echo "ls -d ~/chat_releases/release-* | sort -r"
-          ls -d ~/chat_releases/release-* | sort -r > /tmp/release_dirs.txt
-          echo "Seznam release adresářů seřazen, výstup v /tmp/release_dirs.txt"
-
-          echo "Vybírám adresáře ke smazání (všechny kromě 3 nejnovějších) do souboru /tmp/to_delete.txt ..."
-          tail -n +4 /tmp/release_dirs.txt > /tmp/to_delete.txt
-          echo "Seznam adresářů ke smazání vybrán, výstup v /tmp/to_delete.txt"
-
-          echo "Mažu staré releases podle seznamu v /tmp/to_delete.txt..."
-          cat /tmp/to_delete.txt
-          xargs rm -rf < /tmp/to_delete.txt
-          echo "Mazání starých releases dokončeno."
-
-          echo "Uklízím dočasné soubory..."
-          rm /tmp/release_dirs.txt /tmp/to_delete.txt
-          echo "Dočasné soubory smazány."
+          echo "Spouštím úklid starých releases, ponechávám 3 nejnovější releasy"
+          ls -d ~/chat_releases/release-* | sort -r | tail -n +4 | xargs rm -rf
 
           EOF
 
         env:
-          DEPLOY_DIR: ${{ env.RELEASE_DIR_BASE }}/release-${{ steps.date.outputs.date }}
+          DEPLOY_DIR: ${{ env.RELEASE_DIR_BASE }}/release-${{ env.DATE }}
