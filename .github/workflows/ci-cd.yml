@@ -61,10 +61,12 @@ jobs:
           ssh -o StrictHostKeyChecking=yes -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}
           set -e
           set -x
-          
+
+          echo "Vytvářím nový release directory: $DEPLOY_DIR"
           mkdir -p $DEPLOY_DIR
-          rsync -avz --delete --exclude='.git' ./ ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:$DEPLOY_DIR
-          
+
+          echo "Klonuji repository do $DEPLOY_DIR"
+          git clone git@github.com:Kubis1414/e-commerce-chatbot.git $DEPLOY_DIR
           cd $DEPLOY_DIR
           
           echo "Zapisuji .env soubor"
