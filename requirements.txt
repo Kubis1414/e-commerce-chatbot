@@ -1,17 +1,16 @@
 # Main dependencies
 streamlit
 openai
-requests
 promptflow
 promptflow-tools
 promptflow-core
 promptflow-devkit
-promptflow-azure
-promptflow-tracing
 langchain
 langchain_google_genai
 langchain_openai
 langchain_anthropic
+python-dotenv
+pydantic
 -e .
 
 # Testing dependencies
