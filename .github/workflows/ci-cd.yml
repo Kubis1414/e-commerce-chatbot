@@ -82,6 +82,8 @@ jobs:
 
           echo "Aktivuji virtuální prostředí a instaluji dependencies"
           source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
 
           echo "Deaktivuji virtuální prostředí"
           deactivate
