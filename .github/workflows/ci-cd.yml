@@ -43,7 +43,7 @@ jobs:
     env:
       RELEASE_DIR_BASE: ~/chat_releases
     steps:
-      - name: Checkout kódu
+      - name: Checkout kóduš
         uses: actions/checkout@v2
       - name: Přidání host key serveru do known_hosts
         run: |
@@ -58,9 +58,14 @@ jobs:
         run: echo "DATE=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
       - name: Nasazení kódu pomocí rsync
         run: |
-          ssh -o StrictHostKeyChecking=yes -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "mkdir -p $DEPLOY_DIR"
-          rsync -avz --delete --exclude='.git' ./ ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:$DEPLOY_DIR
+          ssh -o StrictHostKeyChecking=yes -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} <<EOF
+          set -e
           
+          echo "Vytvářím nový release directory: $DEPLOY_DIR"
+          mkdir -p $DEPLOY_DIR
+
+          echo "Klonuji repository do $DEPLOY_DIR"
+          git clone git@github.com:Kubis1414/e-commerce-chatbot.git $DEPLOY_DIR
           cd $DEPLOY_DIR
           
           echo "Zapisuji .env soubor"
@@ -81,6 +86,8 @@ jobs:
 
           echo "Deaktivuji virtuální prostředí"
           deactivate
+
+          EOF
         env:
           DEPLOY_DIR: ${{ env.RELEASE_DIR_BASE }}/release-${{ env.DATE }}
       - name: Pre-deploy testy na serveru
