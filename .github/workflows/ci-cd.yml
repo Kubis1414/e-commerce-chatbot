@@ -24,7 +24,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Nastavení Google credentials
-        run: echo ${{ secrets.GOOGLE_CREDENTIALS_JSON }} > google-credentials.json
+        run: echo '${{ secrets.GOOGLE_CREDENTIALS_JSON }}' > google-credentials.json
 
       - name: Spuštění testů
         run: |
@@ -42,7 +42,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       RELEASE_DIR_BASE: ~/chat_releases
-      CURRENT_RELEASE_LINK: ~/chat_releases/current
     steps:
       - name: Checkout kódu
         uses: actions/checkout@v2
@@ -53,25 +52,28 @@ jobs:
       - name: Přidání SSH klíče
         run: |
           mkdir -p ~/.ssh
-          echo ${{ secrets.SERVER_SSH_KEY }} > ~/.ssh/id_rsa
+          echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
       - name: Get current date
         id: date
-        run: echo "::set-output name=date::$(date +'%Y-%m-%dT%H:%M:%S')"
+        run: echo "::set-output name=date::$(date +'%Y-%m-%dT%H-%M-%S')"
       - name: Připojení k serveru a nasazení Blue/Green
         run: |
           ssh -o StrictHostKeyChecking=yes -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} <<EOF
           set -e
           
           echo "Vytvářím nový release directory: $DEPLOY_DIR"
-          mkdir -p "$DEPLOY_DIR"
+          mkdir -p $DEPLOY_DIR
 
           echo "Klonuji repository do $DEPLOY_DIR"
-          git clone git@github.com:Kubis1414/e-commerce-chatbot.git "$DEPLOY_DIR"
+          git clone git@github.com:Kubis1414/e-commerce-chatbot.git $DEPLOY_DIR
           cd $DEPLOY_DIR
 
           echo "Zapisuji .env soubor"
-          echo ${{ secrets.ENV_VARS }} > .env
+          echo "${{ secrets.ENV_VARS }}" > .env
+
+          echo "Zapisuji google-credentials.json soubor"
+          echo '${{ secrets.GOOGLE_CREDENTIALS_JSON }}' > google-credentials.json
 
           echo "Vytvářím virtuální prostředí, pokud neexistuje"
           if [ ! -d "venv" ]; then
@@ -80,15 +82,11 @@ jobs:
 
           echo "Aktivuji virtuální prostředí a instaluji dependencies"
           source venv/bin/activate
-          pip install -r requirements.txt
 
           echo "Deaktivuji virtuální prostředí"
           deactivate
           EOF
         env:
-          CURRENT_RELEASE_LINK: ${{ env.RELEASE_DIR_BASE }}/current
-          PREVIOUS_RELEASE_DIR: ${{ env.RELEASE_DIR_BASE }}/release-previous
-          NEW_RELEASE_DIR: ${{ env.RELEASE_DIR_BASE }}/release-new
           DEPLOY_DIR: ${{ env.RELEASE_DIR_BASE }}/release-${{ steps.date.outputs.date }}
       - name: Pre-deploy testy na serveru
         run: |
@@ -96,6 +94,9 @@ jobs:
 
           echo "Přepínám do deployment directory: $DEPLOY_DIR"
           cd $DEPLOY_DIR
+
+          echo "Zapisuji .env soubor"
+          echo "${{ secrets.ENV_VARS }}" > .env
 
           echo "Aktivuji virtuální prostředí pro testy"
           source venv/bin/activate
@@ -115,33 +116,53 @@ jobs:
           ssh -o StrictHostKeyChecking=yes -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} <<EOF
           set -e
 
-          echo "Deaktivuji virtuální prostředí (pro jistotu, i když by už nemělo být aktivní)"
-          deactivate
-
-          echo "Přepínám symbolický link current"
-          if [ -L ${{env.CURRENT_RELEASE_LINK}} ]; then
-            echo "Aktuální release link existuje."
-            
-            echo "Aktuální release je: ${{env.CURRENT_TARGET}}"
-            if [ -d ${{env.CURRENT_TARGET}} ]; then
-              echo "Přesouvám aktuální release ${{env.CURRENT_TARGET}} do ${{env.PREVIOUS_RELEASE_DIR}}"
-              mv ${{env.CURRENT_TARGET}} ${{env.PREVIOUS_RELEASE_DIR}}
-            else
-              echo "WARN: Aktuální release target ${{env.CURRENT_TARGET}} neexistuje! Nemohu přesunout do ${{env.PREVIOUS_RELEASE_DIR}}"
-            fi
+          echo "Přepínám symbolický link current na nový release..."
+          if [ -L ~/chat_releases/current ]; then
+            echo "Aktuální 'current' symlink existuje. Odstraňuji ho..."
+            rm ~/chat_releases/current
+          else
+            echo "Aktuální 'current' symlink NEEXISTUJE."
           fi
-          echo "Vytvářím nový symbolický link $CURRENT_RELEASE_LINK -> $DEPLOY_DIR"
-          ln -s "$DEPLOY_DIR" "$CURRENT_RELEASE_LINK"
+
+          echo "Vytvářím nový symlink '~/chat_releases/current' -> '$DEPLOY_DIR'"
+          ln -s $DEPLOY_DIR ~/chat_releases/current
 
           echo "Restartuji systemd service ecommerce_chatbot.service"
           sudo systemctl restart ecommerce_chatbot.service
           echo "Kontroluji status systemd service ecommerce_chatbot.service"
           sudo systemctl status ecommerce_chatbot.service
 
-          echo "Dokončeno nasazení Blue/Green release do $DEPLOY_DIR, current link ukazuje na $CURRENT_RELEASE_LINK"
+          echo "Dokončeno přepnutí 'current' symlink na nový release v '$DEPLOY_DIR', 'current' nyní ukazuje na '~/chat_releases/current'"
+
           EOF
         env:
-          PREVIOUS_RELEASE_DIR: ${{ env.RELEASE_DIR_BASE }}/release-previous
-          NEW_RELEASE_DIR: ${{ env.RELEASE_DIR_BASE }}/release-new
           DEPLOY_DIR: ${{ env.RELEASE_DIR_BASE }}/release-${{ steps.date.outputs.date }}
-          CURRENT_TARGET: readlink ${{env.CURRENT_RELEASE_LINK}}
+      - name: Úklid starých releases
+        run: |
+          ssh -o StrictHostKeyChecking=yes -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} <<EOF
+          set -e
+
+          echo "Spouštím úklid starých releases, ponechávám 3 nejnovější (bez $()...)"
+
+          echo "Listuji release adresáře a řadím je do souboru /tmp/release_dirs.txt ..."
+          echo "ls -d ~/chat_releases/release-* | sort -r"
+          ls -d ~/chat_releases/release-* | sort -r > /tmp/release_dirs.txt
+          echo "Seznam release adresářů seřazen, výstup v /tmp/release_dirs.txt"
+
+          echo "Vybírám adresáře ke smazání (všechny kromě 3 nejnovějších) do souboru /tmp/to_delete.txt ..."
+          tail -n +4 /tmp/release_dirs.txt > /tmp/to_delete.txt
+          echo "Seznam adresářů ke smazání vybrán, výstup v /tmp/to_delete.txt"
+
+          echo "Mažu staré releases podle seznamu v /tmp/to_delete.txt..."
+          cat /tmp/to_delete.txt
+          xargs rm -rf < /tmp/to_delete.txt
+          echo "Mazání starých releases dokončeno."
+
+          echo "Uklízím dočasné soubory..."
+          rm /tmp/release_dirs.txt /tmp/to_delete.txt
+          echo "Dočasné soubory smazány."
+
+          EOF
+
+        env:
+          DEPLOY_DIR: ${{ env.RELEASE_DIR_BASE }}/release-${{ steps.date.outputs.date }}
