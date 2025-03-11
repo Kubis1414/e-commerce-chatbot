@@ -82,7 +82,6 @@ jobs:
 
           echo "Deaktivuji virtuální prostředí"
           deactivate
-          EOF
         env:
           DEPLOY_DIR: ${{ env.RELEASE_DIR_BASE }}/release-${{ env.DATE }}
       - name: Pre-deploy testy na serveru
