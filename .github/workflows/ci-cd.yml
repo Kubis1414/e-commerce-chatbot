@@ -54,16 +54,15 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-      - name: Get current
-        id: date
-        run: echo "::set-output name=date::$(date +'%Y-%m-%dT%H-%M-%S')"
       - name: Get current date
         run: echo "DATE=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
       - name: Nasazení kódu pomocí rsync
         run: |
           ssh -o StrictHostKeyChecking=yes -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "mkdir -p $DEPLOY_DIR"
           rsync -avz --delete --exclude='.git' ./ ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:$DEPLOY_DIR
-
+          
+          cd $DEPLOY_DIR
+          
           echo "Zapisuji .env soubor"
           echo "${{ secrets.ENV_VARS }}" > .env
 
@@ -90,9 +89,6 @@ jobs:
 
           echo "Přepínám do deployment directory: $DEPLOY_DIR"
           cd $DEPLOY_DIR
-
-          echo "Zapisuji .env soubor"
-          echo "${{ secrets.ENV_VARS }}" > .env
 
           echo "Aktivuji virtuální prostředí pro testy"
           source venv/bin/activate
