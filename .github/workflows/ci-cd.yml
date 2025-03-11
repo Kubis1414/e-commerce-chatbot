@@ -24,7 +24,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Nastavení Google credentials
-        run: echo ${{ secrets.GOOGLE_CREDENTIALS_JSON }} > google-credentials.json
+        run: echo "${{ secrets.GOOGLE_CREDENTIALS_JSON }}" > google-credentials.json
 
       - name: Spuštění testů
         run: |
@@ -71,6 +71,9 @@ jobs:
 
           echo "Zapisuji .env soubor"
           echo "${{ secrets.ENV_VARS }}" > .env
+
+          echo "Zapisuji google-credentials.json soubor"
+          echo "${{ secrets.GOOGLE_CREDENTIALS_JSON }}" > google-credentials.json
 
           echo "Vytvářím virtuální prostředí, pokud neexistuje"
           if [ ! -d "venv" ]; then
