@@ -166,7 +166,7 @@ jobs:
 
           # 4. Smazání dočasných souborů
           echo "Uklízím dočasné soubory..."
-          rm /tmp/release_dirs.txt /tmp/to_delete.txt
+          xargs rm -rf < /tmp/to_delete.txt
           echo "Dočasné soubory smazány."
 
           EOF
