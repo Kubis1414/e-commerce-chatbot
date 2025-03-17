@@ -30,6 +30,16 @@ if "selected_page_index" not in st.session_state:
 # Přednastavené hodnoty
 CUSTOMER_IDS = ["CUS765894089", "CUS905621345", "CUS168925307", "CUS788902345", "CUS630952341", "anonymous"]
 
+# Přidání mapování zákazníků
+CUSTOMERS = {
+    "CUS765894089": "Jan Novák",
+    "CUS905621345": "Marie Svobodová",
+    "CUS168925307": "Petr Dvořák",
+    "CUS788902345": "Eva Černá",
+    "CUS630952341": "Tomáš Procházka",
+    "anonymous": "Nepřihlášený zákazník"
+}
+
 # Vytvoření párů title-url pro synchronizaci
 PAGE_DATA = [
     {
@@ -110,7 +120,7 @@ with st.sidebar:
             "Customer ID",
             options=CUSTOMER_IDS,
             key="customer_id",
-            format_func=lambda x: "Nepřihlášený zákazník" if x == "anonymous" else x
+            format_func=lambda x: CUSTOMERS[x]
         )
 
         st.session_state.customer = {
