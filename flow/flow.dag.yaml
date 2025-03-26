@@ -27,6 +27,12 @@ outputs:
   customer:
     type: string
     reference: ${get_answer.output.customer}
+  cost:
+    type: string
+    reference: ${get_answer.output.cost}
+  search_queries:
+    type: string
+    reference: ${get_answer.output.search_queries}
 nodes:
 - name: get_customer_info
   type: python
@@ -51,7 +57,7 @@ nodes:
     type: code
     path: get_documents_from_vector_db.py
   inputs:
-    search_queries: ${generate_search_queries.output}
+    search_queries: ${generate_search_queries.output.search_queries}
 - name: get_answer
   type: python
   source:
@@ -64,3 +70,5 @@ nodes:
     chat_history: ${inputs.chat_history}
     customer: ${get_customer_info.output}
     llm_provider: ${inputs.llm_provider}
+    search_queries: ${generate_search_queries.output.search_queries}
+    token_manager: ${generate_search_queries.output.token_manager}

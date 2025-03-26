@@ -3,6 +3,7 @@ from promptflow.client import PFClient
 from flow.generate_search_queries import generate_search_queries
 from flow.get_answer import get_answer
 from flow.get_customer_info import get_customer_info
+from utils.models import TokenManager
 
 pf_client = PFClient()
 
@@ -64,7 +65,9 @@ def test_get_answer(sample_context, sample_customer, sample_chat_history, sample
         customer=sample_customer,
         chat_history=sample_chat_history,
         llm_provider="GOOGLE",
-        documents=sample_documents
+        documents=sample_documents,
+        search_queries=[], 
+        token_manager=TokenManager()
     )
     assert isinstance(output_data, dict)
     assert "response" in output_data
