@@ -46,12 +46,13 @@ def sample_documents():
 def test_generate_search_queries(sample_chat_history, sample_context):
     """Test generování vyhledávacích dotazů"""
     customer_input = "Jaké máte iPhony?"
-    queries = generate_search_queries(
+    output = generate_search_queries(
         customer_input=customer_input,
         chat_history=sample_chat_history,
         context=sample_context,
-        llm_provider="GOOGLE"
+        llm_provider="OPENAI"
     )
+    queries = output.search_queries
     assert isinstance(queries, list)
     assert len(queries) > 0
     

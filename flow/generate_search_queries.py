@@ -20,7 +20,7 @@ class Output():
 
 
 @tool
-def generate_search_queries(customer_input: str, chat_history: list, context: dict, llm_provider: str) -> List[SearchQuery]:    
+def generate_search_queries(customer_input: str, chat_history: list, context: dict, llm_provider: str) -> List[SearchQuery]:
     llm = Models.get_model(llm_provider, "mini")
     if not llm:
         raise ValueError(f"Nepodporovaný poskytovatel LLM: {llm_provider}")
