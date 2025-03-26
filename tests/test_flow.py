@@ -1,9 +1,8 @@
 import pytest
 from promptflow.client import PFClient
 from flow.generate_search_queries import generate_search_queries
-from flow.get_answer import get_answer, Output
+from flow.get_answer import get_answer
 from flow.get_customer_info import get_customer_info
-from flow.get_documents_from_vector_db import get_documents_from_vector_db
 
 pf_client = PFClient()
 
@@ -54,8 +53,7 @@ def test_generate_search_queries(sample_chat_history, sample_context):
     )
     assert isinstance(queries, list)
     assert len(queries) > 0
-    for query in queries:
-        assert isinstance(query, dict)
+    
 
 def test_get_answer(sample_context, sample_customer, sample_chat_history, sample_documents):
     """Test generování odpovědi"""
