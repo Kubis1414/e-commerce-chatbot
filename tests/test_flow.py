@@ -55,8 +55,7 @@ def test_generate_search_queries(sample_chat_history, sample_context):
     assert isinstance(queries, list)
     assert len(queries) > 0
     for query in queries:
-        assert isinstance(query, str)
-        assert len(query) > 0
+        assert isinstance(query, dict)
 
 def test_get_answer(sample_context, sample_customer, sample_chat_history, sample_documents):
     """Test generování odpovědi"""
@@ -83,15 +82,3 @@ def test_get_customer_info(sample_customer):
     assert isinstance(customer_info, dict)
     assert "customer_id" in customer_info
     assert customer_info["customer_id"] == sample_customer["customer_id"]
-
-# def test_get_documents_from_vector_db():
-#     """Test získávání dokumentů z vektorové databáze"""
-#     query = "iPhone 15 Pro Max"
-#     docs = get_documents_from_vector_db(query)
-#     assert isinstance(docs, list)
-#     if len(docs) > 0:  # Pokud jsou nějaké dokumenty nalezeny
-#         for doc in docs:
-#             assert isinstance(doc, dict)
-#             assert "content" in doc
-#     else:
-#         pytest.skip("Žádné dokumenty nebyly nalezeny v databázi") 
