@@ -1,8 +1,10 @@
 from promptflow.core import tool
 from typing import List
 from pydantic import BaseModel, Field
-from utils.models import Models
 from langchain.prompts.prompt import PromptTemplate
+
+from utils.models import Models, get_model_name, _extract_token_counts, TokenManager
+from utils.weaviate_service import Document
 
 
 class Product(BaseModel):
@@ -29,10 +31,12 @@ class Output(BaseModel):
     chat_history: list = Field(default_factory=list, description="Chat history of the conversation.")  
     context: dict = Field(default_factory=dict, description="Context of the conversation.")
     customer: dict = Field(default_factory=dict, description="Customer information.")
+    search_queries: list = Field(default_factory=list, description="Search queries for the vector database.")
+    cost: float = Field(description="Cost of the message that was generated for the customer.")
 
 
 @tool
-def get_answer(customer_input: str, documents: List[str], context: dict, customer: dict, chat_history: list, llm_provider: str) -> dict:
+def get_answer(customer_input: str, documents: List[Document], context: dict, customer: dict, chat_history: list, llm_provider: str, search_queries: list, token_manager: TokenManager) -> dict:
     llm = Models.get_model(llm_provider)
     if not llm:
         raise ValueError(f"Nepodporovaný poskytovatel LLM: {llm_provider}")
@@ -82,16 +86,25 @@ def get_answer(customer_input: str, documents: List[str], context: dict, custome
     
     output_data = chain.invoke(data)
     response = output_data.get("parsed")
-    
     answer = response.answer
     
+    # Count tokens
+    model_name = get_model_name(llm)
+    input_tokens, output_tokens = _extract_token_counts(output_data)
+    
+    token_manager.add_token(model_name, input_tokens, output_tokens)
+    
     chat_history.append({"customer_input": customer_input, "assistant_answer": answer})
+    
+    cost = token_manager.calculate_total_cost()
     
     output = Output(
         response=response.model_dump(),
         chat_history=chat_history,
         context=context,
-        customer=customer
+        customer=customer,
+        search_queries=search_queries,
+        cost=cost
     )
     
     print(output.model_dump())
