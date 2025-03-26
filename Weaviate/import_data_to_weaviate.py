@@ -10,7 +10,7 @@ WEAVIATE_GRPC = "130.61.26.171:50051"   # gRPC endpoint
 WEAVIATE_API_KEY = os.getenv("WEAVIATE_API_KEY", "")
 print(f"API_KEY: {WEAVIATE_API_KEY}")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-COLLECTION_NAME = "Apple Products"
+COLLECTION_NAME = "Apple_Products"
 BATCH_SIZE = 100
 
 # --- Připojení k Weaviate ---
