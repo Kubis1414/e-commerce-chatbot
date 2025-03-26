@@ -3,33 +3,39 @@ from typing import List
 from pydantic import BaseModel, Field
 from langchain.prompts.prompt import PromptTemplate
 from utils.models import Models
+from utils.weaviate_service import SearchQuery
 
 
 class OutputSchema(BaseModel):
     """Output schema for the LLM that generates search queries."""
 
-    search_queries: List[str] = Field(default_factory=list, description="List of search queries that will be used to search the vector database for documents, related to the customer inquiry.")
+    search_queries: List[SearchQuery] = Field(default_factory=list, description="List of search queries that will be used to search the vector database for documents, related to the customer inquiry.")
 
 
 @tool
-def generate_search_queries(customer_input: str, chat_history: list, context: dict, llm_provider: str) -> list[str]:
-    search_queries = []
-    print(llm_provider)
+def generate_search_queries(customer_input: str, chat_history: list, context: dict, llm_provider: str) -> List[SearchQuery]:    
     llm = Models.get_model(llm_provider, "mini")
     if not llm:
         raise ValueError(f"Nepodporovaný poskytovatel LLM: {llm_provider}")
-        
+    
     prompt = PromptTemplate.from_template('''
         Create a prompt that generates a list of search queries based on customer inquiries. 
         Use the chat history and context to ensure all technical details and product names are retained. 
         The output should be in Czech and formatted as a JSON object containing only the search queries list.
         These search queries should be suitable for use as lookup queries in a vector database.
+        You can also set hard filters for prices which should be used, when a customer mentions price.
+        Leave product code empty.
         
         Instructions:
             Interpret the customer inquiry to determine the products or components for which complete information is needed.
             Ensure all search queries are written in Czech.
             Respond in the following JSON format:
-                "search_queries": []
+                "search_queries": [
+                    "query": "",
+                    "price_min": "",
+                    "price_max": "",
+                    "product_code": ""
+                ]
 
         Context:
             The customer is currently on a page titled """{page_title}""" with URL """{current_url}""".
@@ -49,6 +55,5 @@ def generate_search_queries(customer_input: str, chat_history: list, context: di
     chain = prompt | structured_llm
     
     output_data = chain.invoke(data)
-    search_queries = output_data.get("parsed").search_queries
     
-    return search_queries
+    return output_data["parsed"].search_queries

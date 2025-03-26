@@ -1,15 +1,17 @@
 from promptflow.core import tool
 from typing import List
-import time
 
+from utils.weaviate_service import WeaviateService, SearchQuery
 
 @tool
-def get_documents_from_vector_db(search_queries: List[str]) -> List[str]:
+def get_documents_from_vector_db(search_queries: List[SearchQuery]) -> List:
     documents = []
+    service = WeaviateService()
     
     for query in search_queries:
-        # Simulate fetching documents from a vector database
-        documents.append(f"Document for query: {query}")
-        time.sleep(0.2)
-        
+        retrieved_documents = service.search_products(search_params=query, limit=5)
+        documents.append(retrieved_documents)
+    
+    service.close()
+    
     return documents

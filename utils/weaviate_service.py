@@ -1,7 +1,39 @@
 import weaviate
 import weaviate.classes as wvc
-import os
-from typing import List, Optional
+import os, json
+from pydantic import BaseModel, Field, model_validator
+from typing import List, Optional, Any
+
+
+class SearchQuery(BaseModel):
+    """
+    Represents optional filters that can be applied to a search query.
+    Used as a nested model within OutputSchema.
+    """
+    query: str = Field(
+        ...,
+        description="The core query string for semantic vector search. This text will be vectorized and compared against product content vectors."
+    )
+    min_price: Optional[float] = Field(
+        default=None,
+        description="Optional inclusive minimum price filter. Only products with price >= min_price will be matched.",
+    )
+    max_price: Optional[float] = Field(
+        default=None,
+        description="Optional inclusive maximum price filter. Only products with price <= max_price will be matched.",
+    )
+    product_code: Optional[str] = Field(
+        default=None,
+        description="Optional exact product code to filter by. Useful for finding a specific item variation."
+    )
+
+    @model_validator(mode='after')
+    def check_prices(self) -> 'SearchQuery':
+        """Validates that min_price is not greater than max_price if both are set."""
+        if self.min_price is not None and self.max_price is not None:
+            if self.min_price > self.max_price:
+                raise ValueError("min_price cannot be greater than max_price")
+        return self
 
 
 class WeaviateService:
@@ -67,13 +99,42 @@ class WeaviateService:
         except Exception as e:
             print(f"Chyba při inicializaci WeaviateService: {e}")
             raise
+    
+    def extract_and_print_properties(self, weaviate_results):
+        """
+        Vezme seznam výsledků z Weaviate (očekává strukturu [[{obj1}, {obj2}, ...]]),
+        extrahuje slovník 'properties' z každého objektu a vypíše je formátovaně.
+
+        Args:
+            weaviate_results: Seznam obsahující seznam objektů vrácených z Weaviate.
+
+        Returns:
+            Seznam slovníků, kde každý slovník jsou 'properties' jednoho produktu.
+            Vrací prázdný seznam, pokud vstup nemá očekávaný formát nebo nejsou nalezeny properties.
+        """
+        extracted_properties = []
+
+        if not isinstance(weaviate_results, list) or len(weaviate_results) == 0:
+            print("Chyba: Vstupní data nemají očekávaný formát list.")
+            return extracted_properties
+
+        for i, obj in enumerate(weaviate_results):
+            props = obj.properties
+            if isinstance(props, dict):
+                extracted_properties.append(props)
+            else:
+                print(f"Varování: Objekt na indexu {i} nemá platný slovník 'properties'.")
+
+
+        if not extracted_properties:
+            print("Nebyly nalezeny žádné vlastnosti ('properties') k zobrazení.")
+
+        return extracted_properties
+
 
     def search_products(
         self,
-        query: str,
-        min_price: Optional[float] = None,
-        max_price: Optional[float] = None,
-        product_code: Optional[str] = None,
+        search_params: dict[str, Any],
         limit: int = 5,
         return_props: Optional[List[str]] = None
     ) -> List[wvc.data.DataObject]:
@@ -100,8 +161,31 @@ class WeaviateService:
             print("Chyba: Klient Weaviate není připojen.")
             return []
 
+        query = search_params.query
+        if not query or not isinstance(query, str):
+            print("Chyba: Parametr 'query' chybí nebo není řetězec v search_params.")
+            return []
+        
+        min_price = search_params.min_price
+        max_price = search_params.max_price
+        product_code = search_params.product_code
+        
+        # --- Validace typů (volitelné, ale doporučené) ---
+        if min_price is not None and not isinstance(min_price, (int, float)):
+            print(f"Varování: 'min_price' není číslo ({type(min_price)}), bude ignorováno.")
+            min_price = None
+        if max_price is not None and not isinstance(max_price, (int, float)):
+            print(f"Varování: 'max_price' není číslo ({type(max_price)}), bude ignorováno.")
+            max_price = None
+        if product_code is not None and not isinstance(product_code, str):
+            print(f"Varování: 'product_code' není řetězec ({type(product_code)}), bude ignorováno.")
+            product_code = None
+        if not isinstance(limit, int) or limit <= 0:
+            print(f"Varování: 'limit' není kladné celé číslo ({limit}), použije se výchozí 5.")
+            limit = 5
+    
         try:
-            produkty_collection = self.client.collections.get(self.collection_name)
+            apple_collection = self.client.collections.get(self.collection_name)
 
             # --- Sestavení filtrů ---
             filters_list = []
@@ -110,7 +194,6 @@ class WeaviateService:
             if max_price is not None:
                 filters_list.append(wvc.query.Filter.by_property("price").less_than(max_price))
             if product_code:
-                # Předpokládáme, že 'product_code' je název property ve schématu
                 filters_list.append(wvc.query.Filter.by_property("product_code").equal(product_code))
 
             # Kombinujeme filtry pomocí AND (musí platit všechny)
@@ -127,19 +210,21 @@ class WeaviateService:
                 return_props = ["name", "price", "product_code", "url", "content"]
 
             # --- Provedení dotazu ---
-            response = produkty_collection.query.near_text(
+            response = apple_collection.query.near_text(
                 query=query,
                 limit=limit,
-                filters=combined_filter, # Předáme sestavený filtr
+                filters=combined_filter,
                 return_properties=return_props,
                 return_metadata=wvc.query.MetadataQuery(distance=True)
             )
-
-            return response.objects
+            
+            output = self.extract_and_print_properties(response.objects)     
+              
+            return output
 
         except Exception as e:
             print(f"Chyba při vyhledávání v Weaviate: {e}")
-            return [] # V případě chyby vrátíme prázdný seznam
+            return []
 
     def close(self):
         """Uzavře spojení s Weaviate, pokud existuje."""
@@ -147,69 +232,3 @@ class WeaviateService:
             self.client.close()
             print("Spojení s Weaviate uzavřeno.")
         self.client = None # Resetujeme klienta
-
-# --- Příklad použití (tento kód se spustí, jen když spustíš přímo tento soubor) ---
-if __name__ == "__main__":
-    print("Spouštím příklad použití WeaviateService...")
-
-    weaviate_service = None # Inicializace pro finally blok
-    try:
-        # Vytvoření instance třídy - připojí se k Weaviate
-        weaviate_service = WeaviateService()
-
-        # --- Příklad 1: Obecný dotaz ---
-        print("\n--- Příklad 1: Hledání 'rychlý MacBook' ---")
-        results1 = weaviate_service.search_products(query="rychlý macbook", limit=3)
-        if results1:
-            for obj in results1:
-                print(f"  Vzdálenost: {obj.metadata.distance:.4f}")
-                print(f"  Název: {obj.properties.get('name')}")
-                print(f"  Cena: {obj.properties.get('price')}")
-                print("-" * 10)
-        else:
-            print("  Nenalezeno.")
-
-        # --- Příklad 2: Dotaz s cenovým rozpětím ---
-        print("\n--- Příklad 2: Hledání 'sluchátka přes hlavu' s cenou 5000-15000 Kč ---")
-        results2 = weaviate_service.search_products(
-            query="sluchátka přes hlavu",
-            min_price=5000.0,
-            max_price=15000.0,
-            limit=3
-        )
-        if results2:
-             for obj in results2:
-                print(f"  Vzdálenost: {obj.metadata.distance:.4f}")
-                print(f"  Název: {obj.properties.get('name')}")
-                print(f"  Cena: {obj.properties.get('price')}")
-                print("-" * 10)
-        else:
-            print("  Nenalezeno.")
-
-        # --- Příklad 3: Dotaz s konkrétním kódem produktu (méně časté s nearText, ale možné) ---
-        # Najdeme produkt podle kódu a pak můžeme použít jeho vektor pro nearVector hledání,
-        # nebo jen pro ověření, že filtr funguje. Zde použijeme nearText s filtrem.
-        target_code = "JA940i9d" # Kód z tvých ukázkových dat
-        print(f"\n--- Příklad 3: Hledání 'bezdrátová sluchátka' s kódem '{target_code}' ---")
-        results3 = weaviate_service.search_products(
-            query="bezdrátová sluchátka", # Query může být obecnější, když filtrujeme na kód
-            product_code=target_code,
-            limit=1
-        )
-        if results3:
-            obj = results3[0]
-            print(f"  Vzdálenost: {obj.metadata.distance:.4f}")
-            print(f"  Název: {obj.properties.get('name')}")
-            print(f"  Kód: {obj.properties.get('product_code')}")
-            print(f"  Cena: {obj.properties.get('price')}")
-            print("-" * 10)
-        else:
-            print("  Nenalezeno.")
-
-    except Exception as e:
-        print(f"Nastala chyba v příkladu použití: {e}")
-
-    finally:
-        # Vždy se pokusíme uzavřít spojení, i když došlo k chybě
-        if weaviate_service:
-            weaviate_service.close()
