@@ -27,6 +27,12 @@ if "language" not in st.session_state:
 if "selected_page_index" not in st.session_state:
     st.session_state.selected_page_index = 0
 
+if "cost" not in st.session_state:
+    st.session_state.cost = None
+
+if "search_queries" not in st.session_state:
+    st.session_state.search_queries = None
+
 # Přednastavené hodnoty
 CUSTOMER_IDS = ["CUS765894089", "CUS905621345", "CUS168925307", "CUS788902345", "CUS630952341", "anonymous"]
 
@@ -171,12 +177,18 @@ if customer_message := st.chat_input("Napište svoji zprávu..."):
         # Spuštění flow
         flow_result = pf.test(flow="flow", inputs=flow_inputs)
         
+        print("----------------------------")
+        print(flow_result)
+        print("----------------------------")
+        
         # Získání outputů z flow
         assistant_response = flow_result["response"]["answer"]
         recommended_products = flow_result["response"]["recommended_products"]
-        st.session_state.chat_history = flow_result["chat_history"]
-        st.session_state.context = flow_result["context"]
-        st.session_state.customer = flow_result["customer"]
+        st.session_state.chat_history = flow_result.get("chat_history")
+        st.session_state.context = flow_result.get("context")
+        st.session_state.customer = flow_result.get("customer")
+        st.session_state.cost = flow_result.get("cost")
+        st.session_state.search_queries = flow_result.get("search_queries")
         
         # Přidání odpovědi asistenta do historie
         st.session_state.messages.append({"role": "assistant", "content": assistant_response})
@@ -186,13 +198,26 @@ if customer_message := st.chat_input("Napište svoji zprávu..."):
             # Zobrazení doporučených produktů, pokud nějaké jsou
             if recommended_products:
                 product_carousel(recommended_products)
-            
+
     except Exception as e:
         st.error(f"Došlo k chybě při zpracování požadavku: {str(e)}")
 
 # Debug informace v sidebaru
 with st.sidebar:
     if st.checkbox("Zobrazit debug informace"):
+        if st.session_state.cost is not None:
+            st.caption(f"Cena za poslední zprávu: {st.session_state.cost} CZK")
+        else:
+            st.caption("Cena za poslední zprávu: N/A")
+            
+        if st.session_state.search_queries is not None and st.session_state.search_queries:
+            with st.expander("Použité vyhledávací dotazy (poslední volání)"):
+                st.json(st.session_state.search_queries)
+        else:
+            with st.expander("Použité vyhledávací dotazy (poslední volání)"):
+                    st.write("Žádné vyhledávací dotazy.")
+        st.markdown("---")
+        
         st.write("Context:", st.session_state.context)
         st.write("Customer:", st.session_state.customer)
         st.write("Chat History:", st.session_state.chat_history)

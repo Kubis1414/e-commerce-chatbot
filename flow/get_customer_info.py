@@ -24,7 +24,7 @@ def get_customer_data_from_api(customer_id: str) -> Dict:
         with open(sample_data_path, "r", encoding="utf-8") as f:
             customers_data = json.load(f)
         
-        time.sleep(0.3)
+        time.sleep(0.5)
         # Najdeme zákazníka v seznamu podle customer_id
         for customer in customers_data:
             if customer.get("customer_id") == customer_id:

@@ -1,8 +1,17 @@
+import os
 import weaviate
 import weaviate.classes as wvc
-import os, json
 from pydantic import BaseModel, Field, model_validator
 from typing import List, Optional, Any
+
+
+class Document(BaseModel):
+    """Represents a single product document retrieved from Weaviate."""
+    name: Optional[str] = Field(default=None, description="Product name.")
+    content: Optional[str] = Field(default=None, description="Vectorized content of the product.")
+    url: Optional[str] = Field(default=None, description="Product URL.")
+    product_code: Optional[str] = Field(default=None, description="Product code.")
+    price: Optional[float] = Field(default=None, description="Product price.")
 
 
 class SearchQuery(BaseModel):
@@ -100,7 +109,7 @@ class WeaviateService:
             print(f"Chyba při inicializaci WeaviateService: {e}")
             raise
     
-    def extract_and_print_properties(self, weaviate_results):
+    def extract_and_print_properties(self, weaviate_results) -> List[Document]:
         """
         Vezme seznam výsledků z Weaviate (očekává strukturu [[{obj1}, {obj2}, ...]]),
         extrahuje slovník 'properties' z každého objektu a vypíše je formátovaně.
@@ -112,32 +121,32 @@ class WeaviateService:
             Seznam slovníků, kde každý slovník jsou 'properties' jednoho produktu.
             Vrací prázdný seznam, pokud vstup nemá očekávaný formát nebo nejsou nalezeny properties.
         """
-        extracted_properties = []
+        extracted_products = []
 
         if not isinstance(weaviate_results, list) or len(weaviate_results) == 0:
             print("Chyba: Vstupní data nemají očekávaný formát list.")
-            return extracted_properties
+            return extracted_products
 
         for i, obj in enumerate(weaviate_results):
             props = obj.properties
+
             if isinstance(props, dict):
-                extracted_properties.append(props)
+                doc = Document(**props) 
+                extracted_products.append(doc)
             else:
                 print(f"Varování: Objekt na indexu {i} nemá platný slovník 'properties'.")
 
-
-        if not extracted_properties:
+        if not extracted_products:
             print("Nebyly nalezeny žádné vlastnosti ('properties') k zobrazení.")
 
-        return extracted_properties
+        return extracted_products
 
 
     def search_products(
         self,
         search_params: dict[str, Any],
-        limit: int = 5,
-        return_props: Optional[List[str]] = None
-    ) -> List[wvc.data.DataObject]:
+        limit: int = 5
+        ) -> List[Document]:
         """
         Provádí vektorové vyhledávání (nearText) v kolekci produktů
         s možností filtrování podle ceny a produktového kódu.
@@ -204,10 +213,8 @@ class WeaviateService:
                 combined_filter = filters_list[0]
             # Pokud je filters_list prázdný, combined_filter zůstane None
 
-            # --- Definice vrácených vlastností ---
-            if return_props is None:
-                # Výchozí sada vlastností k vrácení
-                return_props = ["name", "price", "product_code", "url", "content"]
+            # --- Definice vlastností, které se mají vrátit z weaviate ---
+            return_props = ["name", "price", "product_code", "url", "content"]
 
             # --- Provedení dotazu ---
             response = apple_collection.query.near_text(
