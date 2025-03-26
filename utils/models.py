@@ -4,7 +4,7 @@ from langchain_anthropic import ChatAnthropic
 import os
 from dotenv import load_dotenv
 
-from .config import OPENAI_MODEL, OPENAI_MINI_MODEL, GEMINI_MODEL, GEMINI_MINI_MODEL, ANTHROPIC_MODEL, ANTHROPIC_MINI_MODEL, XAI_MODEL, XAI_MINI_MODEL
+from .config import OPENAI_MODEL, OPENAI_MINI_MODEL, GOOGLE_MODEL, GOOGLE_BASIC_MODEL, ANTHROPIC_MODEL, ANTHROPIC_BASIC_MODEL, XAI_MODEL, XAI_BASIC_MODEL
 
 # Načtení proměnných z .env souboru
 load_dotenv()
@@ -33,19 +33,19 @@ class Models:
     )
     
     gemini = ChatGoogleGenerativeAI(
-        model=GEMINI_MODEL,
+        model=GOOGLE_MODEL,
         temperature=0,
         api_key=os.environ.get("GEMINI_API_KEY")
     )
     
     gemini_hot = ChatGoogleGenerativeAI(
-        model=GEMINI_MODEL,
+        model=GOOGLE_MODEL,
         temperature=0.7,
         api_key=os.environ.get("GEMINI_API_KEY")
     )
     
     gemini_mini = ChatGoogleGenerativeAI(
-        model=GEMINI_MINI_MODEL,
+        model=GOOGLE_BASIC_MODEL,
         temperature=0,
         api_key=os.environ.get("GEMINI_API_KEY")
     )
@@ -63,7 +63,7 @@ class Models:
     )
     
     anthropic_mini = ChatAnthropic(
-        model_name=ANTHROPIC_MINI_MODEL,
+        model_name=ANTHROPIC_BASIC_MODEL,
         temperature=0,
         api_key=os.environ.get("ANTHROPIC_API_KEY")
     )
@@ -83,7 +83,7 @@ class Models:
     )
 
     grok_mini = ChatOpenAI(
-        model=XAI_MINI_MODEL,
+        model=XAI_BASIC_MODEL,
         temperature=0,
         base_url="https://api.x.ai/v1",
         api_key=os.environ.get("XAI_API_KEY")
