@@ -3,7 +3,11 @@ from promptflow import PFClient
 from components.ProductCarousel import product_carousel
 
 # Inicializace Streamlit
-st.set_page_config(layout="wide")
+st.set_page_config(
+    page_title="AI Nákupní Asistentka",
+    page_icon="🤖",
+    layout="wide"
+)
 
 # Inicializace chat historie v session state
 if "messages" not in st.session_state:
@@ -137,7 +141,7 @@ with st.sidebar:
             key="llm_provider"
         )
 
-st.title("Chat s e-commerce AI asistentkou")
+st.title("🤖 Chat s e-commerce AI asistentkou")
 
 chat_container = st.container()
 with chat_container:
