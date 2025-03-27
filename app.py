@@ -5,7 +5,7 @@ from components.ProductCarousel import product_carousel
 # Inicializace Streamlit
 st.set_page_config(
     page_title="AI Nákupní Asistentka",
-    page_icon="🤖",
+    page_icon=":robot_face:",
     layout="wide"
 )
 
