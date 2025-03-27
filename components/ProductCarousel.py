@@ -2,127 +2,119 @@ import streamlit as st
 
 def product_carousel(products):
     """
-    Zobrazí mřížku s doporučenými produkty - reaguje na Light/Dark mód.
+    Zobrazí mřížku s doporučenými produkty.
     - Karty mají konzistentní výšku obrázkové části.
-    - Popis je omezen s tooltipem.
+    - Popis je omezen na max_desc_length znaků s tooltipem pro plný text.
     - Celá karta je klikatelná (pokud produkt má URL).
-    - Barvy se přizpůsobují Streamlit tématu (Light/Dark).
 
     Args:
         products (list): Seznam slovníků produktů k zobrazení.
-                         Každý slovník by měl obsahovat klíče:
-                         'name', 'url', 'image_url', 'description', 'price'.
+                        Každý slovník by měl obsahovat klíče:
+                        'name', 'url', 'image_url', 'description', 'price'.
+                        'image_url' bude použita pro zobrazení, nebo placeholder, pokud chybí.
     """
     if not products:
         st.write("Žádné doporučené produkty k zobrazení.")
         return
 
-    # --- 1. Definice CSS Stylů s Theme Proměnnými ---
-    # Tyto styly používají CSS proměnné Streamlitu (--text-color, --secondary-background-color atd.)
-    # aby se přizpůsobily světlému i tmavému režimu.
     st.markdown("""
     <style>
     /* --- Kontejner pro celou kartu --- */
-    .product-card-container {{
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        /* Použijeme proměnnou pro barvu pozadí karty */
-        background-color: var(--secondary-background-color);
-         /* Rámeček odvozený od barvy textu s nízkou průhledností */
-        border: 1px solid rgba(var(--text-color-rgb), 0.1);
-        border-radius: 8px;
-        margin-bottom: 15px;
-        overflow: hidden;
-    }}
+    .product-card-container {
+        height: 100%; /* Základ pro vyplnění výšky sloupce */
+        display: flex; /* Použít flexbox pro vnitřní uspořádání */
+        flex-direction: column; /* Prvky uvnitř budou pod sebou */
+        border: 1px solid #eee; /* Tenký šedý rámeček */
+        border-radius: 8px; /* Zaoblené rohy */
+        margin-bottom: 15px; /* Mezera pod kartou */
+        overflow: hidden; /* Ořízne obsah podle border-radius */
+        background-color: #fff; /* Bílé pozadí karty */
+    }
 
-    /* --- Odkaz obalující celou kartu (nebo fallback div) --- */
-    a.product-card-link, div.product-card-link {{
-        display: flex;
-        flex-direction: column;
-        flex-grow: 1;
-        text-decoration: none;
-        /* Explicitně nastavíme barvu textu tématu */
-        color: var(--text-color);
-        padding: 10px;
-        transition: box-shadow 0.2s ease-in-out, background-color 0.2s ease-in-out;
-    }}
+    /* --- Odkaz obalující celou kartu (pokud existuje URL) --- */
+    a.product-card-link, div.product-card-link { /* Styly platí pro <a> i fallback <div> */
+        display: flex; /* Vnitřní layout pomocí flexbox */
+        flex-direction: column; /* Prvky pod sebou (obrázek, detaily) */
+        flex-grow: 1; /* Odkaz/div zabere všechnu dostupnou výšku v kontejneru */
+        text-decoration: none; /* Bez podtržení */
+        color: inherit; /* Dědit barvu textu (černá/šedá) */
+        padding: 10px; /* Vnitřní odsazení karty */
+        transition: box-shadow 0.2s ease-in-out; /* Plynulý přechod pro hover efekt */
+    }
 
     /* --- Hover efekt pro odkaz --- */
-    a.product-card-link:hover {{
-         /* Mírně tmavší/světlejší pozadí při najetí */
-        background-color: rgba(var(--text-color-rgb), 0.03);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Stín může zůstat jemný */
-        color: var(--text-color); /* Barva textu se nemění */
-        text-decoration: none;
-    }}
+    a.product-card-link:hover {
+        box-shadow: 0 6px 12px rgba(0,0,0,0.1); /* Mírný stín při najetí myší */
+        color: inherit; /* Zachovat barvu textu */
+        text-decoration: none; /* Žádné podtržení */
+    }
 
     /* --- Kontejner pro obrázek --- */
-    .product-image-container {{
-        height: 200px; /* Pevná výška */
+    .product-image-container {
+        height: 200px; /* <-- PEVNÁ VÝŠKA PRO KONTEJNER OBRÁZKU */
         display: flex;
-        align-items: center;
-        justify-content: center;
+        align-items: center; /* Vertikální centrování obrázku */
+        justify-content: center; /* Horizontální centrování obrázku */
         overflow: hidden;
-        margin-bottom: 15px;
-    }}
+        margin-bottom: 15px; /* Mezera mezi obrázkem a textem */
+    }
 
     /* --- Samotný obrázek --- */
-    .product-image {{
+    .product-image {
         max-height: 100%;
         max-width: 100%;
-        object-fit: contain;
-        border-radius: 4px;
-    }}
+        object-fit: contain; /* Zachovat poměr stran, vejít se celý */
+        border-radius: 4px; /* Lehké zaoblení rohů obrázku */
+    }
 
-    /* --- Kontejner pro textovou část --- */
-    .product-details {{
-         flex-grow: 1;
-         display: flex;
-         flex-direction: column;
-    }}
-    .product-details h5 {{ /* Název produktu */
+    /* --- Kontejner pro textovou část (název, popis, cena) --- */
+    .product-details {
+        flex-grow: 1; /* Textová část zabere zbytek místa pod obrázkem */
+        display: flex;
+        flex-direction: column;
+    }
+    .product-details h5 { /* Styl pro název produktu */
         margin-top: 0;
         margin-bottom: 8px;
-        font-size: 1em;
-        font-weight: 600;
-        /* Použijeme barvu textu tématu */
-        color: var(--text-color);
-        /* Omezení na 2 řádky s tečkami */
+        font-size: 1em; /* Velikost písma názvu */
+        font-weight: 600; /* Mírně tučnější název */
+        color: #31333F;
+        /* Omezení na 2 řádky s tečkami (vyžaduje Webkit prohlížeče) */
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
         text-overflow: ellipsis;
-        line-height: 1.3;
-        min-height: 2.6em;
-    }}
-    .product-details small {{ /* Popis produktu */
+        line-height: 1.3; /* Výška řádku pro lepší čitelnost při zalomení */
+        min-height: 2.6em; /* Rezervuje místo pro 2 řádky */
+
+    }
+    .product-details small { /* Styl pro popis */
         font-size: 0.85em;
-        /* Použijeme barvu textu tématu, ale méně výraznou (nižší opacita) */
-        color: var(--text-color);
-        opacity: 0.7;
+        color: #6c757d; /* Tmavě šedá barva popisu */
         line-height: 1.4;
         margin-bottom: 10px;
-        /* Omezení na 3 řádky s tečkami */
+        /* Omezení na 3 řádky s tečkami (pro popis) */
         display: -webkit-box;
         -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
         overflow: hidden;
         text-overflow: ellipsis;
-        min-height: 4.2em;
-    }}
+        min-height: 4.2em; /* Rezervuje místo pro 3 řádky */
 
-    /* --- Kontejner pro cenu --- */
-    .product-price {{
-        margin-top: auto;
-        padding-top: 10px;
+    }
+
+
+    /* --- Kontejner pro cenu (aby byla dole) --- */
+    .product-price {
+        margin-top: auto; /* Posune cenu na spodek kontejneru s detaily */
+        padding-top: 10px; /* Malá mezera nad cenou */
         font-size: 1.1em;
         font-weight: bold;
-        text-align: right;
-        /* Použijeme barvu textu tématu */
-        color: var(--text-color);
-    }}
+        color: #31333F;
+        text-align: right; /* Zarovnání ceny doprava */
+    }
+
     </style>
     """, unsafe_allow_html=True)
 
@@ -145,7 +137,7 @@ def product_carousel(products):
             price = product.get("price")
 
             # Omezení popisku pro zobrazení
-            max_desc_length = 70 # Limit pro popis
+            max_desc_length = 70 # Zvýšíme limit pro popis na 3 řádky
             ellipsis = "..."
             display_description = full_description # Výchozí hodnota
             tooltip_text = None # Tooltip jen pokud zkracujeme
@@ -153,25 +145,24 @@ def product_carousel(products):
             if len(full_description) > max_desc_length:
                 chars_to_keep = max_desc_length - len(ellipsis)
                 if chars_to_keep > 0:
-                   display_description = full_description[:chars_to_keep] + ellipsis
-                   tooltip_text = full_description # Plný text do tooltipu
-                else: # Pokud limit < délka elipsy
-                   display_description = full_description[:max_desc_length]
-                   tooltip_text = full_description
+                    display_description = full_description[:chars_to_keep] + ellipsis
+                    tooltip_text = full_description # Plný text do tooltipu
+                    # Pokud limit < délka elipsy, zobrazíme jen prvních max_desc_length znaků
+                else:
+                    display_description = full_description[:max_desc_length]
+                    tooltip_text = full_description
 
             # Formátování ceny
             if price is not None:
-                # Formátování na celé koruny s nezlomitelnou mezerou
-                formatted_price = f"{price:,.0f} Kč".replace(",", " ")
+                # Formátování na celé koruny s mezerou jako oddělovačem tisíců
+                formatted_price = f"{price:,.0f} Kč".replace(",", " ") # Použijeme nezlomitelnou mezeru
             else:
-                formatted_price = "Cena neuvedena"
+                formatted_price = "Cena neuvedena"
 
             # Sestavení HTML karty
-            # Pokud URL existuje, obalíme kartu odkazem <a>, jinak použijeme <div>
             link_start = f'<a href="{url}" target="_blank" class="product-card-link" title="Zobrazit detail produktu: {name}">' if url else '<div class="product-card-link">'
             link_end = '</a>' if url else '</div>'
 
-            # HTML struktura karty
             card_html = f"""
             <div class="product-card-container">
                 {link_start}
@@ -180,7 +171,7 @@ def product_carousel(products):
                     </div>
                     <div class="product-details">
                         <h5>{name}</h5>
-                        <small {'title="'+tooltip_text+'"' if tooltip_text else ''}>{display_description if display_description else ' '}</small>
+                        <small {'title="'+tooltip_text+'"' if tooltip_text else ''}>{display_description if display_description else ' '}</small>
                         <div class="product-price">
                             {formatted_price}
                         </div>
@@ -188,5 +179,5 @@ def product_carousel(products):
                 {link_end}
             </div>
             """
-            # Vykreslení karty pomocí Streamlit markdown
+            # Vykreslení karty pomocí markdown
             st.markdown(card_html, unsafe_allow_html=True)
