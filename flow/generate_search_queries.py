@@ -6,7 +6,7 @@ from langchain.prompts.prompt import PromptTemplate
 from utils.models import Models, get_model_name, _extract_token_counts, TokenManager
 from utils.weaviate_service import SearchQuery
 
-    
+
 class OutputSchema(BaseModel):
     """Output schema for the LLM that generates search queries."""
 
@@ -42,14 +42,14 @@ def generate_search_queries(customer_input: str, chat_history: list, context: di
             The customer is currently on a page titled """{page_title}""" with URL """{current_url}""".
             
             Customer inquiry: """{customer_input}"""
-            Chat history (first message in order is the newest one, last message in order is the oldest one): """{chat_history}"""
+            Chat history (first message in order is the oldest one, last message in order is the newest, most recent one): """{chat_history}"""
     ''')
     
     data = {
         "page_title": context.get("page_title", ""),
         "current_url": context.get("current_url", ""),
         "customer_input": customer_input,
-        "chat_history": chat_history
+        "chat_history": chat_history[:7]
     }
     
     structured_llm = llm.with_structured_output(OutputSchema, include_raw=True)
