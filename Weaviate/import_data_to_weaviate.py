@@ -1,12 +1,12 @@
 import weaviate
 import weaviate.classes as wvc
 import csv, os, time, ast
+from ..utils.config import WEAVIATE_URL 
+
 
 # --- Konfigurace ---
 csv_filename = "apple_data.csv"
 CSV_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), csv_filename)
-WEAVIATE_URL = "http://130.61.26.171:8080" # HTTP endpoint
-WEAVIATE_GRPC = "130.61.26.171:50051"   # gRPC endpoint
 WEAVIATE_API_KEY = os.getenv("WEAVIATE_API_KEY", "")
 print(f"API_KEY: {WEAVIATE_API_KEY}")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
@@ -19,10 +19,10 @@ auth_config = weaviate.auth.AuthApiKey(api_key=WEAVIATE_API_KEY)
 
 try:
     client = weaviate.connect_to_custom(
-        http_host='130.61.26.171',
+        http_host=WEAVIATE_URL,
         http_port=8080,
         http_secure=False,
-        grpc_host='130.61.26.171',
+        grpc_host=WEAVIATE_URL,
         grpc_port=50051,
         grpc_secure=False,
         auth_credentials=auth_config,
