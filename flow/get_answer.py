@@ -78,7 +78,7 @@ def get_answer(customer_input: str, documents: List[Document], context: dict, cu
     
     data = {
         "customer_input": customer_input,
-        "chat_history": chat_history,
+        "chat_history": chat_history[:7],
         "documents": documents,
         "context": context,
         "customer": customer
@@ -97,7 +97,13 @@ def get_answer(customer_input: str, documents: List[Document], context: dict, cu
     
     token_manager.add_token(model_name, input_tokens, output_tokens)
     
-    chat_history.append({"customer_input": customer_input, "assistant_answer": answer})
+    chat_history.append({
+        "customer_input": customer_input,
+        "assistant_answer": {
+            "answer": answer,
+            "recommended_products": response.recommended_products
+        }
+    })
     
     cost = token_manager.calculate_total_cost()
     
