@@ -252,8 +252,8 @@ class PricingCacheManager:
             "claude_3_5_haiku_latest_output": 5,
             "models/gemini_2_0_flash_input": 0.1,
             "models/gemini_2_0_flash_output": 0.4,
-            "models/gemini_2_0_flash_lite_preview_input": 0.075,
-            "models/gemini_2_0_flash_lite_preview_output": 0.3,
+            "models/gemini_2_0_flash_lite_input": 0.075,
+            "models/gemini_2_0_flash_lite_output": 0.3,
             "grok_2_latest_input": 2,
             "grok_2_latest_output": 10,
         }

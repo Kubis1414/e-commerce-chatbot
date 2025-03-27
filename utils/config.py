@@ -9,3 +9,5 @@ GOOGLE_BASIC_MODEL="gemini-2.0-flash-lite"
 
 XAI_MODEL="grok-2-latest"
 XAI_BASIC_MODEL="grok-2-latest" # XAI momentálně nemá žádný menší model, grok-3-mini není přes API momentánlě k dispozici
+
+WEAVIATE_URL="130.61.26.171"

@@ -3,7 +3,7 @@ import weaviate
 import weaviate.classes as wvc
 from pydantic import BaseModel, Field, model_validator
 from typing import List, Optional, Any
-
+from .config import WEAVIATE_URL 
 
 class Document(BaseModel):
     """Represents a single product document retrieved from Weaviate."""
@@ -53,9 +53,9 @@ class WeaviateService:
 
     def __init__(
         self,
-        http_host: str = "130.61.26.171",
+        http_host: str = WEAVIATE_URL,
         http_port: int = 8080,
-        grpc_host: str = "130.61.26.171",
+        grpc_host: str = WEAVIATE_URL,
         grpc_port: int = 50051,
         weaviate_api_key: str = os.getenv("WEAVIATE_API_KEY", ""),
         openai_api_key: str = os.getenv("OPENAI_API_KEY", ""),
