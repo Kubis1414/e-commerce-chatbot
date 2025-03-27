@@ -11,10 +11,11 @@ class Product(BaseModel):
     """Product model."""
 
     name: str = Field(description="Name of the product.")
-    description: str = Field(description="Description of the product.")
+    description: str = Field(description="Very vert short description of the product.")
     price: float = Field(description="Price of the product.")
-    image_url: str = Field(description="Image URL of the product.")
+    product_code: str = Field(description="Product code of the product.")
     url: str = Field(description="URL of the product.")
+    image_url: str = Field(description="URL of the product image.")
 
 
 class OutputSchema(BaseModel):
@@ -43,7 +44,11 @@ def get_answer(customer_input: str, documents: List[Document], context: dict, cu
     
     prompt = PromptTemplate.from_template('''
         You are a helpful customer service assistant for an e-commerce company. Your task is to provide helpful and accurate responses to customer inquiries.
-
+        Into the list of reccomended products please fill in the title of the product with an very short title max 6 words, the description with a short decsription of the product, 
+        do not mention price nor availability. The product_code with the Product code of the recommended product such as NL250b1a1a or JA0ws84 and the url with the URL of the product.
+        You should leave the image_url empty.
+        In the list you should include between 3-4 products. If the customer doesnt say otherwise.
+        
         Instructions:
         - Use the provided context, documents, and chat history to generate a comprehensive response
         - Maintain a friendly and professional tone
@@ -98,15 +103,25 @@ def get_answer(customer_input: str, documents: List[Document], context: dict, cu
     
     cost = token_manager.calculate_total_cost()
     
+    response_dict = response.model_dump()
+
+    if response_dict["recommended_products"] and isinstance(response_dict["recommended_products"], list):
+        for product in response_dict["recommended_products"]:
+            product_code = product["product_code"]
+
+            # Zkontrolujeme, zda product_code existuje a je to neprázdný string
+            if product_code and isinstance(product_code, str) and product_code.strip():
+                image_url = f"https://image.alza.cz/products/{product_code}/{product_code}.jpg?width=500&height=500"
+                product["image_url"] = image_url # Přidáme URL obrázku do dict produktu
+
     output = Output(
-        response=response.model_dump(),
+        response=response_dict,
         chat_history=chat_history,
         context=context,
         customer=customer,
         search_queries=search_queries,
         cost=cost
     )
-    
-    print(output.model_dump())
-    
+
+    print(output.model_dump_json(indent=2))
     return output.model_dump()

@@ -57,16 +57,12 @@ PAGE_DATA = [
         "url": "https://eshop.cz/mobily/iphone-15-pro-max"
     },
     {
-        "title": "Notebooky MacBook Pro M1 Pro",
-        "url": "https://eshop.cz/notebooky/macbook-pro-m1-pro"
+        "title": "Notebook MacBook Pro M4 Pro",
+        "url": "https://eshop.cz/notebooky/macbook-pro-m4-pro"
     },
     {
-        "title": 'Televize Samsung 8K 75"',
-        "url": 'https://eshop.cz/televize/samsung-8k-75'
-    },
-    {
-        "title": "Kontakt a podpora",
-        "url": "https://eshop.cz/kontakt"
+        "title": "Tablet iPad Air 13 M2",
+        "url": "https://eshop.cz/tablety/ipad-air-13-m2"
     }
 ]
 
@@ -141,7 +137,7 @@ with st.sidebar:
             key="llm_provider"
         )
 
-st.title("Chat s e-commerce AI asistenkou")
+st.title("Chat s e-commerce AI asistentkou")
 
 chat_container = st.container()
 with chat_container:
@@ -177,13 +173,10 @@ if customer_message := st.chat_input("Napište svoji zprávu..."):
         # Spuštění flow
         flow_result = pf.test(flow="flow", inputs=flow_inputs)
         
-        print("----------------------------")
-        print(flow_result)
-        print("----------------------------")
-        
         # Získání outputů z flow
         assistant_response = flow_result["response"]["answer"]
         recommended_products = flow_result["response"]["recommended_products"]
+
         st.session_state.chat_history = flow_result.get("chat_history")
         st.session_state.context = flow_result.get("context")
         st.session_state.customer = flow_result.get("customer")
@@ -215,7 +208,7 @@ with st.sidebar:
                 st.json(st.session_state.search_queries)
         else:
             with st.expander("Použité vyhledávací dotazy (poslední volání)"):
-                    st.write("Žádné vyhledávací dotazy.")
+                st.write("Žádné vyhledávací dotazy.")
         st.markdown("---")
         
         st.write("Context:", st.session_state.context)
