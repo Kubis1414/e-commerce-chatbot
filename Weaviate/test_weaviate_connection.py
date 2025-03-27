@@ -1,7 +1,7 @@
 import weaviate
 import os
 from weaviate.classes.init import AdditionalConfig, Timeout
-from ..utils.config import WEAVIATE_URL 
+from utils.config import WEAVIATE_URL 
 
 auth_config = weaviate.auth.AuthApiKey(api_key=os.getenv("WEAVIATE_API_KEY", ""))
 

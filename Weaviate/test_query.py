@@ -1,7 +1,7 @@
 import weaviate
 import weaviate.classes as wvc
 import os, json
-from ..utils.config import WEAVIATE_URL 
+from utils.config import WEAVIATE_URL
 
 
 # --- Konfigurace ---

@@ -3,7 +3,7 @@ import weaviate
 import weaviate.classes as wvc
 from pydantic import BaseModel, Field, model_validator
 from typing import List, Optional, Any
-from .config import WEAVIATE_URL 
+from .config import WEAVIATE_URL
 
 class Document(BaseModel):
     """Represents a single product document retrieved from Weaviate."""
