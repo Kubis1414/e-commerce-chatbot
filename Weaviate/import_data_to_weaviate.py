@@ -86,17 +86,7 @@ try:
                     name="price",
                     data_type=wvc.config.DataType.NUMBER,
                     skip_vectorization=True,
-                ),
-                wvc.config.Property(
-                    name="is_main_product",
-                    data_type=wvc.config.DataType.INT, # INT pro 0 nebo 1
-                    skip_vectorization=True,
-                ),
-                wvc.config.Property(
-                    name="is_accessory",
-                    data_type=wvc.config.DataType.INT, # INT pro 0 nebo 1
-                    skip_vectorization=True,
-                ),
+                )
             ]
         )
         print(f"Kolekce '{COLLECTION_NAME}' vytvořena.")
@@ -118,7 +108,7 @@ try:
             reader = csv.DictReader(csvfile, delimiter='|')
 
             # Ověření existence základních sloupců (volitelné, ale užitečné)
-            required_cols = ['uuid', 'name', 'content', 'priceFrom', 'mainProductInd', 'accessoryInd']
+            required_cols = ['uuid', 'name', 'content', 'priceFrom']
             if not all(col in reader.fieldnames for col in required_cols):
                 print(f"Varování: CSV souboru ({csv_filename}) mohou chybět některé očekávané sloupce.")
                 print(f"Očekávané (alespoň): {required_cols}")
@@ -179,18 +169,6 @@ try:
                     except (ValueError, TypeError):
                         print(f"Varování: Neplatná hodnota 'priceFrom' ('{row.get('priceFrom')}') na řádku {row_num} (UUID: {row['uuid']}). Nastavuji None.")
                         properties["price"] = None
-
-                    try:
-                        properties["is_main_product"] = int(row['mainProductInd']) if row.get('mainProductInd') is not None else 0
-                    except (ValueError, TypeError):
-                        print(f"Varování: Neplatná hodnota 'mainProductInd' ('{row.get('mainProductInd')}') na řádku {row_num} (UUID: {row['uuid']}). Nastavuji 1.")
-                        properties["is_main_product"] = 1
-
-                    try:
-                        properties["is_accessory"] = int(row['accessoryInd']) if row.get('accessoryInd') is not None else 0
-                    except (ValueError, TypeError):
-                        print(f"Varování: Neplatná hodnota 'accessoryInd' ('{row.get('accessoryInd')}') na řádku {row_num} (UUID: {row['uuid']}). Nastavuji 0.")
-                        properties["is_accessory"] = 0
 
                     objects_to_insert.append(wvc.data.DataObject(properties=properties))
 
