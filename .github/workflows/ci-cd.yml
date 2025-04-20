@@ -16,7 +16,7 @@ jobs:
       - name: Nastavení Pythonu
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10.12'
+          python-version: '3.9.6'
 
       - name: Instalace závislostí
         run: |
@@ -43,7 +43,7 @@ jobs:
     env:
       RELEASE_DIR_BASE: ~/chat_releases
     steps:
-      - name: Checkout kóduš
+      - name: Checkout kódu
         uses: actions/checkout@v2
       - name: Přidání host key serveru do known_hosts
         run: |

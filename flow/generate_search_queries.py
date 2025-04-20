@@ -33,10 +33,10 @@ def generate_search_queries(customer_input: str, chat_history: list, context: di
         The output should contain multiple search queries to cover different possible interpretations of the customer’s request.
 
         Instructions:
-            •	Interpret the customer inquiry to determine the relevant products or components that need information.
-            •	Utilize past messages from the chat history to refine the queries.
-            •	If the customer mentions a price, apply the corresponding price_min and price_max filters.
-            •	The product_code field should remain empty.
+            - Interpret the customer inquiry to determine the relevant products or components that need information.
+            - Utilize past messages from the chat history to refine the queries.
+            - If the customer mentions a price, apply the corresponding price_min and price_max filters.
+            - The product_code field should remain empty.
 
         Context:
             The customer is currently on a page titled """{page_title}""" with URL """{current_url}""".
@@ -101,3 +101,11 @@ def generate_search_queries(customer_input: str, chat_history: list, context: di
     )
     
     return output
+
+{
+  "name": "Mobilní telefon iPhone 16 Pro Max 256GB přírodní titan",
+  "content": "Kód: RI052b3 **Mobilní telefon** [iPhone 16 Pro Max 256GB přírodní titan](https://www.alza.cz/kod/RI052b3) -  6,9\" Super Retina XDR OLED 2868 × 1320 (120Hz),  operační paměť 8 GB,  vnitřní paměť 256 GB,  single SIM + eSIM,  procesor Apple A18 Pro,  fotoaparát: 48Mpx (f/1,78) hlavní + 48Mpx širokoúhlý + 12Mpx teleobjektiv,  přední kamera 12Mpx,  GPS,  NFC,  LTE, 5G,  USB-C,  voděodolný dle IP68,  rychlé nabíjení,  bezdrátové nabíjení 25W,  baterie 4685 mAh,  model 2024,  iOS - aktuálně dostupné za 34290Kč, s hodnocením 4.76/5 na základě 212 recenzí. V prodeji od září 2024.",
+  "product_code": "RI052b3",
+  "url": "https://www.alza.cz/kod/RI052b3",
+  "price": 34290.0
+}

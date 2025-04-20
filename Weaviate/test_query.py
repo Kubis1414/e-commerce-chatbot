@@ -16,7 +16,7 @@ BATCH_SIZE = 100
 # search_query = "sluchátka s ANC"
 # search_query = "notebook pro práci na cestách do 40 000"
 # search_query = "nejlevnější iPhone"
-search_query = "kryt na telefon ihpone 16 PRo max s MagSafe"
+search_query = "ihpone 16 Pro max titan prirodni"
 
 print(f"Hledám produkty podobné: '{search_query}'")
 
@@ -43,10 +43,10 @@ try:
     if not client.is_ready():
         raise ConnectionError("Weaviate není připraveno. Zkontrolujte logy serveru.")    
     
-    # --- Získání reference ke kolekci ---
+    # Získání reference ke kolekci
     produkty_collection = client.collections.get(COLLECTION_NAME)
 
-    # --- Vektorové vyhledávání (nearText) ---
+    # Vektorové vyhledávání (nearText)
     response = produkty_collection.query.near_text(
         query=search_query,
         limit=5,

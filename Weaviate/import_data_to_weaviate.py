@@ -4,7 +4,7 @@ import csv, os, time, ast
 from utils.config import WEAVIATE_URL 
 
 
-# --- Konfigurace ---
+# Konfigurace
 csv_filename = "apple_data.csv"
 CSV_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), csv_filename)
 WEAVIATE_API_KEY = os.getenv("WEAVIATE_API_KEY", "")
@@ -13,7 +13,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 COLLECTION_NAME = "Apple_Products"
 BATCH_SIZE = 100
 
-# --- Připojení k Weaviate ---
+# Připojení k Weaviate
 print("Připojování k Weaviate...")
 auth_config = weaviate.auth.AuthApiKey(api_key=WEAVIATE_API_KEY)
 
@@ -36,7 +36,7 @@ try:
     if not client.is_ready():
         raise ConnectionError("Weaviate není připraveno. Zkontrolujte logy serveru.")
 
-    # --- Definice a vytvoření schématu (kolekce) ---
+    # Definice a vytvoření schématu (kolekce)
     print(f"Kontrola/vytváření kolekce '{COLLECTION_NAME}'...")
 
     if not client.collections.exists(COLLECTION_NAME):
@@ -93,10 +93,10 @@ try:
     else:
         print(f"Kolekce '{COLLECTION_NAME}' již existuje.")
 
-    # --- Získání reference ke kolekci ---
+    # Získání reference ke kolekci
     apple_collection = client.collections.get(COLLECTION_NAME)
 
-    # --- Čtení CSV a import dat v dávkách ---
+    # Čtení CSV a import dat v dávkách
     print(f"Zahajuji import dat z {CSV_FILE_PATH}...")
     objects_to_insert = []
     skipped_rows = 0
@@ -133,7 +133,7 @@ try:
                         "manufacturer": row.get('manufacturer'),
                     }
 
-                    # --- Zpracování productCode ---
+                    # Zpracování productCode
                     product_code_str = row.get('productCode')
                     cleaned_product_code = None # Výchozí hodnota, pokud se nepodaří extrahovat
                     if product_code_str:
@@ -199,9 +199,9 @@ try:
                 print(f"Vkládám poslední dávku {final_batch_size} objektů (celkem {imported_count})...")
                 result = apple_collection.data.insert_many(objects_to_insert)
                 if result.has_errors:
-                     print(f"Chyby při vkládání poslední dávky:")
-                     for i, err_obj in result.errors.items():
-                         print(f"  - Objekt index {i}: {err_obj.message}")
+                    print(f"Chyby při vkládání poslední dávky:")
+                    for i, err_obj in result.errors.items():
+                        print(f"  - Objekt index {i}: {err_obj.message}")
 
         end_time = time.time()
         print(f"\nImport dokončen.")

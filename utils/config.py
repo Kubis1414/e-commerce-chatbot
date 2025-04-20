@@ -8,6 +8,6 @@ GOOGLE_MODEL="gemini-2.0-flash"
 GOOGLE_BASIC_MODEL="gemini-2.0-flash-lite"
 
 XAI_MODEL="grok-3-beta"
-XAI_BASIC_MODEL="grok-3-mini-beta"
+XAI_BASIC_MODEL="grok-3-beta"
 
 WEAVIATE_URL="localhost"

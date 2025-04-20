@@ -3,6 +3,7 @@ from typing import List
 
 from utils.weaviate_service import WeaviateService, SearchQuery
 
+
 @tool
 def get_documents_from_vector_db(search_queries: List[SearchQuery]) -> List:
     documents = []
@@ -15,7 +16,7 @@ def get_documents_from_vector_db(search_queries: List[SearchQuery]) -> List:
     
     service.close()
     
-    #deduplikace dokumentu
+    # deduplikace dokumentu
     output_documents: list = []
     seen_documents = set()
     
