@@ -60,28 +60,26 @@ def get_answer(customer_input: str, documents: List[Document], context: dict, cu
         -	If customer information is available, personalize the response using their name (vocative form).
         -	DO NOT greet the customer!
         -	Recommend only relevant products based on the inquiry.
-        -	Always respond in Czech.
+        -	Always respond in {language}.
         -	Format product recommendations clearly, following the response structure.
         -   The reccommended products must also be mentioned in the answer.
 
     Context:
-        -	General context: {context}
-        -	Customer details: {customer}
-        -	Chat history: {chat_history}
-        -	Relevant documents: {documents}
-        -	Customer inquiry: {customer_input}
-
-        Always provide a response in the following format:
-            "answer": "Your response in Czech",
-            "recommended_products": []
+        - The customer is currently on a page titled """{page_title}""" with URL """{current_url}""".
+        - Customer details: """{customer}"""
+        - Relevant documents: """{documents}"""
+        - Customer inquiry: """{customer_input}"""
+        - Chat history (first message in order is the oldest one, last message in order is the newest, most recent one): """{chat_history}"""
     ''')
     
     data = {
         "customer_input": customer_input,
         "chat_history": chat_history[:7],
         "documents": documents,
-        "context": context,
-        "customer": customer
+        "customer": customer,
+        "language": context.get("language", "CZ"),
+        "page_title": context.get("page_title", ""),
+        "current_url": context.get("current_url", "")
     }
     
     structured_llm = llm.with_structured_output(OutputSchema, include_raw=True)
