@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field, model_validator
 from typing import List, Optional, Any
 from .config import WEAVIATE_URL
 
+
 class Document(BaseModel):
     """Represents a single product document retrieved from Weaviate."""
     name: Optional[str] = Field(default=None, description="Product name.")
@@ -179,7 +180,6 @@ class WeaviateService:
         max_price = search_params.max_price
         product_code = search_params.product_code
         
-        # --- Validace typů (volitelné, ale doporučené) ---
         if min_price is not None and not isinstance(min_price, (int, float)):
             print(f"Varování: 'min_price' není číslo ({type(min_price)}), bude ignorováno.")
             min_price = None
@@ -196,7 +196,7 @@ class WeaviateService:
         try:
             apple_collection = self.client.collections.get(self.collection_name)
 
-            # --- Sestavení filtrů ---
+            # Sestavení filtrů
             filters_list = []
             if min_price is not None:
                 filters_list.append(wvc.query.Filter.by_property("price").greater_than(min_price))
@@ -205,7 +205,7 @@ class WeaviateService:
             if product_code:
                 filters_list.append(wvc.query.Filter.by_property("product_code").equal(product_code))
 
-            # Kombinujeme filtry pomocí AND (musí platit všechny)
+            # Kombinujeme filtry pomocí AND
             combined_filter = None
             if len(filters_list) > 1:
                 combined_filter = wvc.query.Filter.all_of(filters_list)
@@ -213,10 +213,10 @@ class WeaviateService:
                 combined_filter = filters_list[0]
             # Pokud je filters_list prázdný, combined_filter zůstane None
 
-            # --- Definice vlastností, které se mají vrátit z weaviate ---
+            # Definice vlastností, které se mají vrátit z weaviate
             return_props = ["name", "price", "product_code", "url", "content"]
 
-            # --- Provedení dotazu ---
+            # Provedení dotazu 
             response = apple_collection.query.near_text(
                 query=query,
                 limit=limit,

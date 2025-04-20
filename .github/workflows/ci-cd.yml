@@ -43,7 +43,7 @@ jobs:
     env:
       RELEASE_DIR_BASE: ~/chat_releases
     steps:
-      - name: Checkout kóduš
+      - name: Checkout kódu
         uses: actions/checkout@v2
       - name: Přidání host key serveru do known_hosts
         run: |

@@ -133,9 +133,11 @@ class TokenCounter:
 class TokenManager:
     """Manages token counting and cost calculation"""
     
+    
     def __init__(self):
         self.tokens = []
         self.pricing_manager = PricingManager()
+    
     
     def add_token(self, model: str, input_tokens: int, output_tokens: int, note: str="") -> None:
         """Add token usage to tracking"""
@@ -199,6 +201,7 @@ class PricingCacheManager:
     file_name = 'pricing_cache.json'
     file_path = os.path.join(output_dir, file_name)
     
+    
     def get_usd_czk_exchange_rate(self, date) -> float:
         """Returns the USD/CZK exchange rate for a specific day. We call the kurzy.cz API to query the ČNB exchange rate."""
         try:
@@ -254,8 +257,8 @@ class PricingCacheManager:
             "models/gemini_2_0_flash_output": 0.4,
             "models/gemini_2_0_flash_lite_input": 0.075,
             "models/gemini_2_0_flash_lite_output": 0.3,
-            "grok_2_latest_input": 2,
-            "grok_2_latest_output": 10,
+            "grok_3_beta_input": 3,
+            "grok_3_beta_output": 15,
         }
         
         return api_costs

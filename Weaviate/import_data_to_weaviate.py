@@ -4,7 +4,7 @@ import csv, os, time, ast
 from utils.config import WEAVIATE_URL 
 
 
-# --- Konfigurace ---
+# Konfigurace
 csv_filename = "apple_data.csv"
 CSV_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), csv_filename)
 WEAVIATE_API_KEY = os.getenv("WEAVIATE_API_KEY", "")
@@ -13,7 +13,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 COLLECTION_NAME = "Apple_Products"
 BATCH_SIZE = 100
 
-# --- Připojení k Weaviate ---
+# Připojení k Weaviate
 print("Připojování k Weaviate...")
 auth_config = weaviate.auth.AuthApiKey(api_key=WEAVIATE_API_KEY)
 
@@ -36,7 +36,7 @@ try:
     if not client.is_ready():
         raise ConnectionError("Weaviate není připraveno. Zkontrolujte logy serveru.")
 
-    # --- Definice a vytvoření schématu (kolekce) ---
+    # Definice a vytvoření schématu (kolekce)
     print(f"Kontrola/vytváření kolekce '{COLLECTION_NAME}'...")
 
     if not client.collections.exists(COLLECTION_NAME):
@@ -86,27 +86,17 @@ try:
                     name="price",
                     data_type=wvc.config.DataType.NUMBER,
                     skip_vectorization=True,
-                ),
-                wvc.config.Property(
-                    name="is_main_product",
-                    data_type=wvc.config.DataType.INT, # INT pro 0 nebo 1
-                    skip_vectorization=True,
-                ),
-                wvc.config.Property(
-                    name="is_accessory",
-                    data_type=wvc.config.DataType.INT, # INT pro 0 nebo 1
-                    skip_vectorization=True,
-                ),
+                )
             ]
         )
         print(f"Kolekce '{COLLECTION_NAME}' vytvořena.")
     else:
         print(f"Kolekce '{COLLECTION_NAME}' již existuje.")
 
-    # --- Získání reference ke kolekci ---
+    # Získání reference ke kolekci
     apple_collection = client.collections.get(COLLECTION_NAME)
 
-    # --- Čtení CSV a import dat v dávkách ---
+    # Čtení CSV a import dat v dávkách
     print(f"Zahajuji import dat z {CSV_FILE_PATH}...")
     objects_to_insert = []
     skipped_rows = 0
@@ -118,7 +108,7 @@ try:
             reader = csv.DictReader(csvfile, delimiter='|')
 
             # Ověření existence základních sloupců (volitelné, ale užitečné)
-            required_cols = ['uuid', 'name', 'content', 'priceFrom', 'mainProductInd', 'accessoryInd']
+            required_cols = ['uuid', 'name', 'content', 'priceFrom']
             if not all(col in reader.fieldnames for col in required_cols):
                 print(f"Varování: CSV souboru ({csv_filename}) mohou chybět některé očekávané sloupce.")
                 print(f"Očekávané (alespoň): {required_cols}")
@@ -143,7 +133,7 @@ try:
                         "manufacturer": row.get('manufacturer'),
                     }
 
-                    # --- Zpracování productCode ---
+                    # Zpracování productCode
                     product_code_str = row.get('productCode')
                     cleaned_product_code = None # Výchozí hodnota, pokud se nepodaří extrahovat
                     if product_code_str:
@@ -180,18 +170,6 @@ try:
                         print(f"Varování: Neplatná hodnota 'priceFrom' ('{row.get('priceFrom')}') na řádku {row_num} (UUID: {row['uuid']}). Nastavuji None.")
                         properties["price"] = None
 
-                    try:
-                        properties["is_main_product"] = int(row['mainProductInd']) if row.get('mainProductInd') is not None else 0
-                    except (ValueError, TypeError):
-                        print(f"Varování: Neplatná hodnota 'mainProductInd' ('{row.get('mainProductInd')}') na řádku {row_num} (UUID: {row['uuid']}). Nastavuji 1.")
-                        properties["is_main_product"] = 1
-
-                    try:
-                        properties["is_accessory"] = int(row['accessoryInd']) if row.get('accessoryInd') is not None else 0
-                    except (ValueError, TypeError):
-                        print(f"Varování: Neplatná hodnota 'accessoryInd' ('{row.get('accessoryInd')}') na řádku {row_num} (UUID: {row['uuid']}). Nastavuji 0.")
-                        properties["is_accessory"] = 0
-
                     objects_to_insert.append(wvc.data.DataObject(properties=properties))
 
                     # Pokud dosáhneme velikosti dávky, vložíme data
@@ -221,9 +199,9 @@ try:
                 print(f"Vkládám poslední dávku {final_batch_size} objektů (celkem {imported_count})...")
                 result = apple_collection.data.insert_many(objects_to_insert)
                 if result.has_errors:
-                     print(f"Chyby při vkládání poslední dávky:")
-                     for i, err_obj in result.errors.items():
-                         print(f"  - Objekt index {i}: {err_obj.message}")
+                    print(f"Chyby při vkládání poslední dávky:")
+                    for i, err_obj in result.errors.items():
+                        print(f"  - Objekt index {i}: {err_obj.message}")
 
         end_time = time.time()
         print(f"\nImport dokončen.")
