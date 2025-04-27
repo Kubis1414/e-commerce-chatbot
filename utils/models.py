@@ -93,6 +93,7 @@ class Models:
             provider: LLM provider ("GOOGLE", "XAI", "OPENAI", "ANTHROPIC")
             model_type: Type of model ("mini", "normal", "hot"), default is "normal"
         """
+        
         provider_map = {
             "GOOGLE": {
                 "mini": Models.gemini_mini,

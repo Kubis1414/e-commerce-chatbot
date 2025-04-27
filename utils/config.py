@@ -10,4 +10,4 @@ GOOGLE_BASIC_MODEL="gemini-2.0-flash-lite"
 XAI_MODEL="grok-3-beta"
 XAI_BASIC_MODEL="grok-3-beta"
 
-WEAVIATE_URL="localhost"
+WEAVIATE_URL="130.61.26.171"

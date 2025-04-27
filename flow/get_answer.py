@@ -33,6 +33,7 @@ class Output(BaseModel):
     context: dict = Field(default_factory=dict, description="Context of the conversation.")
     customer: dict = Field(default_factory=dict, description="Customer information.")
     search_queries: list = Field(default_factory=list, description="Search queries for the vector database.")
+    documents: List[Document] = Field(default_factory=list, description="Documents that are used to generate the answer.")
     cost: float = Field(description="Cost of the message that was generated for the customer.")
 
 
@@ -122,6 +123,7 @@ def get_answer(customer_input: str, documents: List[Document], context: dict, cu
         context=context,
         customer=customer,
         search_queries=search_queries,
+        documents=documents,
         cost=cost
     )
 
