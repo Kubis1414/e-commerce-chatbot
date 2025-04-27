@@ -21,26 +21,15 @@ def product_carousel(products):
     <style>
     /* --- Carousel Container (Used for both Mobile and Desktop) --- */
     .product-carousel-container {
-        position: relative; /* Needed for the absolute positioned pseudo-element */
         display: block; /* Visible by default */
         overflow-x: auto; /* Horizontal scrolling */
         white-space: nowrap; /* Prevent wrapping */
-        padding: 10px 0 10px 8px; /* Keep left/top/bottom padding */
-        /* Remove right padding and clip-path, gradient will handle the hint */
+        padding: 10px 0 10px 8px; /* Add left padding, keep top/bottom */
+        padding-right: 30px; /* Add right padding to make the next item peek */
+        clip-path: inset(0 0 0 0); /* Clip content to padding box */
         -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
         scrollbar-width: none; /* Hide scrollbar (Firefox) */
         margin: 0 -10px; /* Compensate for Streamlit padding */
-    }
-    /* Add gradient overlay to indicate scrollability */
-    .product-carousel-container::after {
-        content: '';
-        position: absolute;
-        right: 0;
-        top: 0;
-        bottom: 0;
-        width: 50px; /* Width of the fade effect */
-        background: linear-gradient(to left, #ffffff 20%, rgba(255, 255, 255, 0)); /* White fade */
-        pointer-events: none; /* Allow clicks/scrolls through the gradient */
     }
     .product-carousel-container::-webkit-scrollbar {
         display: none; /* Hide scrollbar (Chrome/Safari) */
