@@ -1,13 +1,16 @@
 inputs:
   customer_input:
     type: string
-    default: ""
+    default: můžeš mi doporučit nějakej telfon ?
   chat_history:
     type: list
     default: []
   context:
     type: object
-    default: {}
+    default:
+      page_title: Domů - E-shop s elektronikou
+      current_url: https://eshop.cz/
+      language: DE
   customer:
     type: object
     default: {}
