@@ -1,5 +1,6 @@
 .env
 .venv
+.vscode
 gen-lang-client-0615879883-ad0fcb0ce2b8.json
 Flashpost-tests
 .vscode
@@ -10,3 +11,5 @@ __pycache__
 *.egg-info
 Weaviate/apple_data.csv
 utils/pricing_cache
+test_results/provider_test_*
+test_results/test_results_detail/

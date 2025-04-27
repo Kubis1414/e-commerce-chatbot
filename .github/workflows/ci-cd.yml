@@ -29,7 +29,7 @@ jobs:
       - name: Spuštění testů
         run: |
           export PYTHONPATH=$PYTHONPATH:$(pwd)
-          pytest tests
+          pytest -v -k "not providers"
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
@@ -102,7 +102,7 @@ jobs:
 
           echo "Spouštím testy v pre-produkčním prostředí"
           export PYTHONPATH=$PYTHONPATH:$(pwd)
-          pytest tests
+          pytest -v -k "not providers"
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}

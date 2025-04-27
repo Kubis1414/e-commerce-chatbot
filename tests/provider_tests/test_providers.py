@@ -1,10 +1,18 @@
-import os, logging, csv
+import os, logging, csv, datetime, json
+import pytest
+from pathlib import Path
 from pydantic import BaseModel, Field
 from promptflow.client import PFClient
 from pytest_csv_params.decorator import csv_params
 from langchain.prompts.prompt import PromptTemplate
 
 from utils.models import Models
+
+# Setup logging for test results
+RESULTS_DIR = Path("test_results")
+RESULTS_DETAIL_DIR = RESULTS_DIR / "test_results_detail"
+RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+RESULTS_DETAIL_DIR.mkdir(parents=True, exist_ok=True)
 
 pf_client = PFClient()
 
@@ -58,7 +66,7 @@ def evaluate_flow_result(flow_result: dict, question: str, benchmark_answer: str
     data = {
         "question": question,
         "benchmark_answer": benchmark_answer,
-        "answer_to_evaluate": f'{flow_result["Response"]}',
+        "answer_to_evaluate": f'{flow_result["response"]}',
         "documents": f'{flow_result["documents"]}'
     }
     
@@ -69,6 +77,63 @@ def evaluate_flow_result(flow_result: dict, question: str, benchmark_answer: str
     output = output_data.get("parsed")
     
     return output
+
+
+def log_test_result(llm_provider, customer_input, chat_history, person, flow_result, result_evaluate):
+    """Log test results to a CSV file with timestamp."""
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    results_file = RESULTS_DIR / f"provider_test_results_{timestamp.split('_')[0]}.csv"
+    
+    # Create header if file doesn't exist
+    is_new_file = not results_file.exists()
+    
+    with open(results_file, 'a', newline='', encoding='utf-8') as f:
+        fieldnames = [
+            'timestamp', 'llm_provider', 'accuracy_relevance_rating', 'grounding_rating', 'product_recommendation_rating',
+            'total_score', 'customer_input', 'flow_response'
+        ]
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        
+        if is_new_file:
+            writer.writeheader()
+        
+        # Prepare data for CSV
+        row = {
+            'timestamp': timestamp,
+            'llm_provider': llm_provider,
+            'customer_input': customer_input,
+            'accuracy_relevance_rating': result_evaluate.accuracy_relevance_rating,
+            'grounding_rating': result_evaluate.grounding_rating,
+            'product_recommendation_rating': result_evaluate.product_recommendation_rating,
+            'total_score': (result_evaluate.accuracy_relevance_rating + 
+                           result_evaluate.grounding_rating + 
+                           result_evaluate.product_recommendation_rating),
+            'flow_response': flow_result.get('response', 'Error: No response')
+        }
+        
+        writer.writerow(row)
+    
+    # Also save detailed JSON for further analysis
+    json_file = RESULTS_DETAIL_DIR / f"provider_test_detail_{llm_provider}_{timestamp}.json"
+    json_data = {
+        'timestamp': timestamp,
+        'llm_provider': llm_provider,
+        'customer_input': customer_input,
+        'chat_history': chat_history,
+        'person': person,
+        'evaluation': {
+            'accuracy_relevance_rating': result_evaluate.accuracy_relevance_rating,
+            'grounding_rating': result_evaluate.grounding_rating,
+            'product_recommendation_rating': result_evaluate.product_recommendation_rating,
+            'explanation': result_evaluate.explanation
+        },
+        'flow_result': flow_result
+    }
+    
+    with open(json_file, 'w', encoding='utf-8') as f:
+        json.dump(json_data, f, ensure_ascii=False, indent=2)
+    
+    logging.info(f"Test results logged to {results_file} and {json_file}")
 
 
 def run_flow(llm_provider, customer_input, chat_history, person, benchmark_answer) -> RatingOutput:
@@ -91,16 +156,20 @@ def run_flow(llm_provider, customer_input, chat_history, person, benchmark_answe
         flow_result = pf_client.test(flow=flow_path, inputs=flow_input)
     except Exception as e:
         logging.error("Výjimka při spuštění pf_client.test: %s", e)
-        flow_result = {"Response": "Chyba zpracování - {e}" }
+        flow_result = {"response": f"Chyba zpracování - {e}" }
     
     if flow_result is None:
         logging.error("Test failed with Question: %s \r\n and answer is: %s ", customer_input)
+        flow_result = {"response": "Test failed - flow_result is None"}
     else:
-        logging.info("Test passed with Question: %s \r\n and answer is: %s ", customer_input, flow_result['Response'])
+        logging.info("Test passed with Question: %s \r\n and answer is: %s ", customer_input, flow_result['response'])
     
     # zpracujeme vysledek z flow a porovname ho s tim, co za odpoved ocekavame 
     result_evaluate = evaluate_flow_result(flow_result, customer_input, benchmark_answer)
     
+    # Log test results
+    log_test_result(llm_provider, customer_input, chat_history, person, flow_result, result_evaluate)
+        
     return result_evaluate
 
 
@@ -114,15 +183,16 @@ class CsvParamsDefaultDialect(csv.Dialect):
     skipinitialspace = True
 
 
+@pytest.mark.providers
 @csv_params(
-    data_file = "tests/test_files/provider_test_data.csv",
+    data_file = "tests/provider_tests/test_files/provider_test_data.csv",
     data_casts = {
         "customer_input": str,
         "chat_history": cast_to_list,
         "person": str,
         "benchmark_answer": str
     },
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
     dialect = CsvParamsDefaultDialect,
 )
 
@@ -136,19 +206,20 @@ def test_provider_google(customer_input, chat_history, person, benchmark_answer)
         good_answer = True
     else:
         good_answer = False
-    
+        
     assert good_answer
 
 
+@pytest.mark.providers
 @csv_params(
-    data_file = "tests/test_files/provider_test_data.csv",
+    data_file = "tests/provider_tests/test_files/provider_test_data.csv",
     data_casts = {
         "customer_input": str,
         "chat_history": cast_to_list,
         "person": str,
         "benchmark_answer": str
     },
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
     dialect = CsvParamsDefaultDialect,
 )
 
@@ -166,15 +237,16 @@ def test_provider_xai(customer_input, chat_history, person, benchmark_answer):
     assert good_answer
 
 
+@pytest.mark.providers
 @csv_params(
-    data_file = "tests/test_files/provider_test_data.csv",
+    data_file = "tests/provider_tests/test_files/provider_test_data.csv",
     data_casts = {
         "customer_input": str,
         "chat_history": cast_to_list,
         "person": str,
         "benchmark_answer": str
     },
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
     dialect = CsvParamsDefaultDialect,
 )
 
@@ -192,15 +264,16 @@ def test_provider_openai(customer_input, chat_history, person, benchmark_answer)
     assert good_answer
 
 
+@pytest.mark.providers
 @csv_params(
-    data_file = "tests/test_files/provider_test_data.csv",
+    data_file = "tests/provider_tests/test_files/provider_test_data.csv",
     data_casts = {
         "customer_input": str,
         "chat_history": cast_to_list,
         "person": str,
         "benchmark_answer": str
     },
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
     dialect = CsvParamsDefaultDialect,
 )
 

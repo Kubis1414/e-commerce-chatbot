@@ -1,16 +1,13 @@
 inputs:
   customer_input:
     type: string
-    default: můžeš mi doporučit nějakej telfon ?
+    default: ""
   chat_history:
     type: list
     default: []
   context:
     type: object
-    default:
-      page_title: Domů - E-shop s elektronikou
-      current_url: https://eshop.cz/
-      language: DE
+    default: {}
   customer:
     type: object
     default: {}
@@ -36,6 +33,9 @@ outputs:
   search_queries:
     type: string
     reference: ${get_answer.output.search_queries}
+  documents:
+    type: string
+    reference: ${get_answer.output.documents}
 nodes:
 - name: get_customer_info
   type: python
