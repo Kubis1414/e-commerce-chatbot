@@ -142,7 +142,8 @@ def product_carousel(products):
             display_description = full_description # Výchozí hodnota
             tooltip_text = None # Tooltip jen pokud zkracujeme
 
-            if len(full_description) > max_desc_length:
+            # Check if description is None or empty before checking length
+            if full_description and len(full_description) > max_desc_length:
                 chars_to_keep = max_desc_length - len(ellipsis)
                 if chars_to_keep > 0:
                     display_description = full_description[:chars_to_keep] + ellipsis
@@ -154,8 +155,13 @@ def product_carousel(products):
 
             # Formátování ceny
             if price is not None:
-                # Formátování na celé koruny s mezerou jako oddělovačem tisíců
-                formatted_price = f"{price:,.0f} Kč".replace(",", " ") # Použijeme nezlomitelnou mezeru
+                try:
+                    # Convert to float if it's not already, and round to nearest integer
+                    price_float = float(price)
+                    # Formátování na celé koruny s mezerou jako oddělovačem tisíců
+                    formatted_price = f"{price_float:,.0f} Kč".replace(",", " ") # Použijeme nezlomitelnou mezeru
+                except (ValueError, TypeError):
+                    formatted_price = "Cena neuvedena"
             else:
                 formatted_price = "Cena neuvedena"
 
