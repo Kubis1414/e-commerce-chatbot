@@ -49,16 +49,7 @@ def incomplete_products():
 def mock_streamlit():
     """Mock all Streamlit functions used in the component."""
     with patch('components.ProductCarousel.st') as mock_st:
-        # Setup column mocking
-        mock_columns = [MagicMock() for _ in range(4)]  # Create mocks for up to 4 columns
-        mock_st.columns.return_value = mock_columns
-        
-        # For each column, configure context manager behavior
-        for col in mock_columns:
-            # Make the context manager return the mock itself
-            col.__enter__.return_value = col
-            col.__exit__.return_value = None
-        
+        # We no longer need to mock columns as we're using a direct HTML carousel
         yield mock_st
 
 def test_product_carousel_with_valid_products(mock_streamlit, sample_products):
@@ -67,8 +58,7 @@ def test_product_carousel_with_valid_products(mock_streamlit, sample_products):
     product_carousel(sample_products)
     
     # Verify Streamlit calls
-    mock_streamlit.markdown.assert_called()  # CSS style is applied
-    mock_streamlit.columns.assert_called_once_with(2)  # Should create 2 columns for 2 products
+    mock_streamlit.markdown.assert_called()  # CSS style and carousel HTML are applied
     
     # Verify product rendering (checking for product names in HTML)
     html_calls = [call_args[0][0] for call_args in mock_streamlit.markdown.call_args_list]
@@ -88,15 +78,20 @@ def test_product_carousel_with_no_products(mock_streamlit):
     
     # Should show a message about no products
     mock_streamlit.write.assert_called_once_with("Žádné doporučené produkty k zobrazení.")
-    # Should not create any columns
-    mock_streamlit.columns.assert_not_called()
+    # Should not render the carousel HTML
+    # Check that markdown was not called with carousel HTML (only with CSS)
+    carousel_calls = [c for c in mock_streamlit.markdown.call_args_list 
+                    if c[0][0] and '<div class="product-carousel-container">' in str(c[0][0])]
+    assert len(carousel_calls) == 0
 
 def test_product_carousel_with_incomplete_data(mock_streamlit, incomplete_products):
     """Test product_carousel with incomplete product data."""
     product_carousel(incomplete_products)
     
-    # Verify column creation
-    mock_streamlit.columns.assert_called_once_with(2)
+    # Verify carousel HTML rendering
+    carousel_calls = [c for c in mock_streamlit.markdown.call_args_list 
+                    if c[0][0] and '<div class="product-carousel-container">' in str(c[0][0])]
+    assert len(carousel_calls) > 0
     
     # Verify rendered HTML
     html_calls = [call_args[0][0] for call_args in mock_streamlit.markdown.call_args_list]

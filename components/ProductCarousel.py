@@ -19,7 +19,32 @@ def product_carousel(products):
 
     st.markdown("""
     <style>
-    /* --- Kontejner pro celou kartu --- */
+    /* --- Carousel Container (Used for both Mobile and Desktop) --- */
+    .product-carousel-container {
+        display: block; /* Visible by default */
+        overflow-x: auto; /* Horizontal scrolling */
+        white-space: nowrap; /* Prevent wrapping */
+        padding: 10px 0 10px 8px; /* Add left padding, keep top/bottom */
+        padding-right: 30px; /* Add right padding to make the next item peek */
+        clip-path: inset(0 0 0 0); /* Clip content to padding box */
+        -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        scrollbar-width: none; /* Hide scrollbar (Firefox) */
+        margin: 0 -10px; /* Compensate for Streamlit padding */
+    }
+    .product-carousel-container::-webkit-scrollbar {
+        display: none; /* Hide scrollbar (Chrome/Safari) */
+    }
+
+    /* --- Carousel Item Styling (Common) --- */
+    .carousel-item {
+        display: inline-block; /* Items side-by-side */
+        width: 250px; /* Fixed width for carousel items */
+        padding: 0 8px; /* Spacing between items */
+        vertical-align: top;
+        white-space: normal; /* Allow text wrapping inside the item */
+    }
+
+    /* --- Product Card Container (Common Styling) --- */
     .product-card-container {
         height: 100%; /* Základ pro vyplnění výšky sloupce */
         display: flex; /* Použít flexbox pro vnitřní uspořádání */
@@ -49,17 +74,20 @@ def product_carousel(products):
         text-decoration: none; /* Žádné podtržení */
     }
 
-    /* --- Kontejner pro obrázek --- */
+    /* --- Kontejner pro obrázek (Common) --- */
+    /* Keep desktop height for consistency, or adjust if needed */
     .product-image-container {
-        height: 200px; /* <-- PEVNÁ VÝŠKA PRO KONTEJNER OBRÁZKU */
+        height: 200px; 
         display: flex;
         align-items: center; /* Vertikální centrování obrázku */
         justify-content: center; /* Horizontální centrování obrázku */
         overflow: hidden;
         margin-bottom: 15px; /* Mezera mezi obrázkem a textem */
     }
+    
+    /* --- Media Queries Removed - Styles below apply to all sizes --- */
 
-    /* --- Samotný obrázek --- */
+    /* --- Samotný obrázek (Common) --- */
     .product-image {
         max-height: 100%;
         max-width: 100%;
@@ -118,58 +146,52 @@ def product_carousel(products):
     </style>
     """, unsafe_allow_html=True)
 
-    # --- 2. Zobrazení produktů s použitím CSS tříd ---
-    num_columns = min(len(products), 4) # Max 4 sloupce
-    cols = st.columns(num_columns)
+    # --- 2. Generate HTML for the Carousel ---
+    carousel_html = '<div class="product-carousel-container">' # Use the unified class name
 
-    for idx, product in enumerate(products):
-        col_index = idx % num_columns
-        with cols[col_index]:
-            # Získání dat (s výchozími hodnotami pro bezpečnost)
-            name = product.get('name', 'Neznámý produkt')
-            url = product.get('url')
-            image_url = product.get('image_url') # Získáme hodnotu
-            # Kontrola, zda image_url je None, prázdný string nebo jen bílé znaky
-            if not image_url or not str(image_url).strip():
-                image_url = "https://placehold.co/400x300?text=Obrázek+není+k+dispozici" # Placeholder
+    for product in products:
+        # --- Get product data ---
+        name = product.get('name', 'Neznámý produkt')
+        url = product.get('url')
+        image_url = product.get('image_url')
+        if not image_url or not str(image_url).strip():
+            image_url = "https://placehold.co/400x300?text=Obrázek+není+k+dispozici"
 
-            full_description = product.get("description", "")
-            price = product.get("price")
+        full_description = product.get("description", "")
+        price = product.get("price")
 
-            # Omezení popisku pro zobrazení
-            max_desc_length = 70 # Zvýšíme limit pro popis na 3 řádky
-            ellipsis = "..."
-            display_description = full_description # Výchozí hodnota
-            tooltip_text = None # Tooltip jen pokud zkracujeme
+        # --- Truncate description ---
+        max_desc_length = 70 # Zvýšíme limit pro popis na 3 řádky
+        ellipsis = "..."
+        display_description = full_description # Výchozí hodnota
+        tooltip_text = None # Tooltip jen pokud zkracujeme
 
-            # Check if description is None or empty before checking length
-            if full_description and len(full_description) > max_desc_length:
-                chars_to_keep = max_desc_length - len(ellipsis)
-                if chars_to_keep > 0:
-                    display_description = full_description[:chars_to_keep] + ellipsis
-                    tooltip_text = full_description # Plný text do tooltipu
-                    # Pokud limit < délka elipsy, zobrazíme jen prvních max_desc_length znaků
-                else:
-                    display_description = full_description[:max_desc_length]
-                    tooltip_text = full_description
-
-            # Formátování ceny
-            if price is not None:
-                try:
-                    # Convert to float if it's not already, and round to nearest integer
-                    price_float = float(price)
-                    # Formátování na celé koruny s mezerou jako oddělovačem tisíců
-                    formatted_price = f"{price_float:,.0f} Kč".replace(",", " ") # Použijeme nezlomitelnou mezeru
-                except (ValueError, TypeError):
-                    formatted_price = "Cena neuvedena"
+        # Check if description is None or empty before checking length
+        if full_description and len(full_description) > max_desc_length:
+            chars_to_keep = max_desc_length - len(ellipsis)
+            if chars_to_keep > 0:
+                display_description = full_description[:chars_to_keep] + ellipsis
+                tooltip_text = full_description # Plný text do tooltipu
+                # Pokud limit < délka elipsy, zobrazíme jen prvních max_desc_length znaků
             else:
+                display_description = full_description[:max_desc_length]
+                tooltip_text = full_description
+
+        # --- Format price ---
+        if price is not None:
+            try:
+                price_float = float(price)
+                formatted_price = f"{price_float:,.0f} Kč".replace(",", " ")
+            except (ValueError, TypeError):
                 formatted_price = "Cena neuvedena"
+        else:
+            formatted_price = "Cena neuvedena"
 
-            # Sestavení HTML karty
-            link_start = f'<a href="{url}" target="_blank" class="product-card-link" title="Zobrazit detail produktu: {name}">' if url else '<div class="product-card-link">'
-            link_end = '</a>' if url else '</div>'
+        # --- Build HTML for a single card ---
+        link_start = f'<a href="{url}" target="_blank" class="product-card-link" title="Zobrazit detail produktu: {name}">' if url else '<div class="product-card-link">'
+        link_end = '</a>' if url else '</div>'
 
-            card_html = f"""
+        card_html = f"""
             <div class="product-card-container">
                 {link_start}
                     <div class="product-image-container">
@@ -184,6 +206,12 @@ def product_carousel(products):
                     </div>
                 {link_end}
             </div>
-            """
-            # Vykreslení karty pomocí markdown
-            st.markdown(card_html, unsafe_allow_html=True)
+        """
+
+        # --- Add card to Carousel HTML string ---
+        carousel_html += f'<div class="carousel-item">{card_html}</div>'
+
+    carousel_html += '</div>'  # Close product-carousel-container
+
+    # --- 3. Render the Carousel HTML structure ---
+    st.markdown(carousel_html, unsafe_allow_html=True)
