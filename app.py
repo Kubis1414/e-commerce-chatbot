@@ -83,15 +83,15 @@ LANGUAGES = {
 
 # Mapování LLM providerů
 LLM_PROVIDERS = {
+    "OPENAI": "OpenAI GPT",
     "GOOGLE": "Google Gemini",
     "XAI": "XAI Grok",
-    "OPENAI": "OpenAI GPT",
     "ANTHROPIC": "Anthropic Claude"
 }
 
 # Inicializace LLM providera v session state pokud neexistuje
 if "llm_provider" not in st.session_state:
-    st.session_state.llm_provider = "GOOGLE"
+    st.session_state.llm_provider = "OPENAI"
 
 # Vytvoření layoutu
 with st.sidebar:
