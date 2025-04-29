@@ -76,7 +76,7 @@ def get_answer(customer_input: str, documents: List[Document], context: dict, cu
     data = {
         "customer_input": customer_input,
         "chat_history": chat_history[:7],
-        "documents": documents,
+        "documents": documents or [],
         "customer": customer,
         "language": context.get("language", "CZ"),
         "page_title": context.get("page_title", ""),

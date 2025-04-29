@@ -10,8 +10,8 @@ from utils.models import Models
 
 # Setup logging for test results
 RESULTS_DIR = Path("test_results")
-RESULTS_DETAIL_DIR = RESULTS_DIR / "test_results_detail"
 RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+RESULTS_DETAIL_DIR = RESULTS_DIR / "test_results_detail"
 RESULTS_DETAIL_DIR.mkdir(parents=True, exist_ok=True)
 
 pf_client = PFClient()
@@ -79,7 +79,7 @@ def evaluate_flow_result(flow_result: dict, question: str, benchmark_answer: str
     return output
 
 
-def log_test_result(llm_provider, customer_input, chat_history, person, flow_result, result_evaluate):
+def log_test_result(llm_provider, customer_input, chat_history, person, flow_result, result_evaluate, duration=0):
     """Log test results to a CSV file with timestamp."""
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     results_file = RESULTS_DIR / f"provider_test_results_{timestamp.split('_')[0]}.csv"
@@ -90,7 +90,7 @@ def log_test_result(llm_provider, customer_input, chat_history, person, flow_res
     with open(results_file, 'a', newline='', encoding='utf-8') as f:
         fieldnames = [
             'timestamp', 'llm_provider', 'accuracy_relevance_rating', 'grounding_rating', 'product_recommendation_rating',
-            'total_score', 'customer_input', 'flow_response'
+            'total_score', 'duration', 'cost', 'customer_input', 'flow_response'
         ]
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         
@@ -108,7 +108,9 @@ def log_test_result(llm_provider, customer_input, chat_history, person, flow_res
             'total_score': (result_evaluate.accuracy_relevance_rating + 
                            result_evaluate.grounding_rating + 
                            result_evaluate.product_recommendation_rating),
-            'flow_response': flow_result.get('response', 'Error: No response')
+            'flow_response': flow_result.get('response', 'Error: No response'),
+            'duration': duration if duration is not None else 'N/A',
+            'cost': flow_result.get('cost', 'N/A')
         }
         
         writer.writerow(row)
@@ -127,7 +129,8 @@ def log_test_result(llm_provider, customer_input, chat_history, person, flow_res
             'product_recommendation_rating': result_evaluate.product_recommendation_rating,
             'explanation': result_evaluate.explanation
         },
-        'flow_result': flow_result
+        'flow_result': flow_result,
+        'duration': duration
     }
     
     with open(json_file, 'w', encoding='utf-8') as f:
@@ -153,7 +156,11 @@ def run_flow(llm_provider, customer_input, chat_history, person, benchmark_answe
     }
     
     try:
+        start_time = datetime.datetime.now()
         flow_result = pf_client.test(flow=flow_path, inputs=flow_input)
+        end_time = datetime.datetime.now()
+        duration = (end_time - start_time).total_seconds()
+        logging.info(f"Flow execution time: {duration} seconds")
     except Exception as e:
         logging.error("Výjimka při spuštění pf_client.test: %s", e)
         flow_result = {"response": f"Chyba zpracování - {e}" }
@@ -168,7 +175,7 @@ def run_flow(llm_provider, customer_input, chat_history, person, benchmark_answe
     result_evaluate = evaluate_flow_result(flow_result, customer_input, benchmark_answer)
     
     # Log test results
-    log_test_result(llm_provider, customer_input, chat_history, person, flow_result, result_evaluate)
+    log_test_result(llm_provider, customer_input, chat_history, person, flow_result, result_evaluate, duration)
         
     return result_evaluate
 
