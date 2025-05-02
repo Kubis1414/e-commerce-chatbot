@@ -1,5 +1,5 @@
 import streamlit as st
-from promptflow import PFClient
+from promptflow.client import PFClient
 from components.ProductCarousel import product_carousel
 
 # Inicializace Streamlit
